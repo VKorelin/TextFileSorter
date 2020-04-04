@@ -11,10 +11,11 @@ namespace FileGenerator.Generation
         {
             if (Encoding.Equals(Encoding.Unicode))
                 return new UnicodeSizeCalculator();
-            else if (Encoding.Equals(Encoding.Unicode))
+            
+            if (Encoding.Equals(Encoding.UTF8))
                 return new Utf8SizeCalculator();
-            else
-                throw new Exception($"Unsupported encoding type: {Encoding}");
+            
+            throw new Exception($"Unsupported encoding type: {Encoding}");
         }
     }
 }
