@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using FileGenerator.IO;
 
@@ -43,9 +42,9 @@ namespace FileGenerator.Generation
 
             while (true)
             {
-                // MinValue is 4 because each entry should have at least one digit, dot, space and single character
-                var nextLength = _randomNumberGenerator.Generate(4, MaxEntrySize);
-                if (nextLength < diff)
+                // MinValue is 6 because each entry should have at least one digit, dot, space, single character, \r, \n
+                var nextLength = _randomNumberGenerator.Generate(6, MaxEntrySize);
+                if (nextLength < diff - 6)
                 {
                     lengths.Add(nextLength);
                     diff -= nextLength;
