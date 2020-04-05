@@ -1,4 +1,5 @@
-﻿using FileGenerator.IO;
+﻿using FileGenerator.Generation;
+using FileGenerator.IO;
 
 namespace FileGenerator.Validation
 {
@@ -19,8 +20,8 @@ namespace FileGenerator.Validation
                 return false;
             }
 
-            // Generated file should contain at least two duplicated rows (6 chars for each row)
-            return long.TryParse(args[0], out fileSize) && _encodingInfoProvider.GetStringLength(fileSize) > 12;
+            // Generated file should contain at least two duplicated rows
+            return long.TryParse(args[0], out fileSize) && _encodingInfoProvider.GetStringLength(fileSize) > EntryInfo.MinLength * 2;
         }
     }
 }

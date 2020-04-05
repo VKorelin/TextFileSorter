@@ -26,7 +26,7 @@ namespace FileGenerator
             Logger.Info("Validate arguments");
             if (!_argumentsValidator.IsValid(args, out var fileSize))
             {
-                Logger.Error($"FileSize should be specified as first argument and be more than {_encodingInfoProvider.GetBytesCount(12)}");
+                Logger.Error($"FileSize should be specified as first argument and be more than {_encodingInfoProvider.GetBytesCount(EntryInfo.MinLength * 2)}");
                 return GenerationResult.ArgumentsInvalid;
             }
 

@@ -42,9 +42,8 @@ namespace FileGenerator.Generation
 
             while (true)
             {
-                // MinValue is 6 because each entry should have at least one digit, dot, space, single character, \r, \n
-                var nextLength = _randomNumberGenerator.Generate(6, MaxEntrySize);
-                if (nextLength < diff - 6)
+                var nextLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, MaxEntrySize);
+                if (nextLength < diff - EntryInfo.MinLength)
                 {
                     lengths.Add(nextLength);
                     diff -= nextLength;
