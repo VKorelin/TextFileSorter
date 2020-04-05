@@ -10,14 +10,17 @@ namespace FileGenerator.Generation
         private const int MaxEntrySize = 100;
 
         private readonly IEntryGenerator _entryGenerator;
+        private readonly IRandomNumberGenerator _randomNumberGenerator;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
-        private readonly Random _random;
 
-        public ChunkGenerator(IEntryGenerator entryGenerator, IEncodingInfoProviderFactory encodingInfoProviderFactory)
+        public ChunkGenerator(
+            IEntryGenerator entryGenerator, 
+            IEncodingInfoProviderFactory encodingInfoProviderFactory,
+            IRandomNumberGenerator randomNumberGenerator)
         {
             _entryGenerator = entryGenerator;
+            _randomNumberGenerator = randomNumberGenerator;
             _encodingInfoProvider = encodingInfoProviderFactory.Create();
-            _random = new Random();
         }
 
         public string GenerateNext(long bufferSize)
@@ -41,7 +44,7 @@ namespace FileGenerator.Generation
             while (true)
             {
                 // MinValue is 4 because each entry should have at least one digit, dot, space and single character
-                var nextLength = _random.Next(4, MaxEntrySize);
+                var nextLength = _randomNumberGenerator.Generate(4, MaxEntrySize);
                 if (nextLength < diff)
                 {
                     lengths.Add(nextLength);

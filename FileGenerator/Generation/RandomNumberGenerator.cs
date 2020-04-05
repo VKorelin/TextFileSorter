@@ -11,7 +11,7 @@ namespace FileGenerator.Generation
             _random = new Random();
         }
 
-        public int Generate(int max)
-            => _random.Next(max);
+        public int Generate(int min, int max)
+            => _random.Next(min, max);
     }
 }

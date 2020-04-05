@@ -5,12 +5,12 @@ namespace FileGenerator.Generation
     internal sealed class RandomStringGenerator : IRandomStringGenerator
     {
         private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
+        
+        private readonly IRandomNumberGenerator _randomNumberGenerator;
 
-        private readonly Random _random;
-
-        public RandomStringGenerator()
+        public RandomStringGenerator(IRandomNumberGenerator randomNumberGenerator)
         {
-            _random = new Random();
+            _randomNumberGenerator = randomNumberGenerator;
         }
         
         public string Generate(long size)
@@ -23,7 +23,7 @@ namespace FileGenerator.Generation
             var data = new char[size];
             for (var i = 0; i < size; i++)
             {
-                data[i] = Chars[_random.Next(Chars.Length)];
+                data[i] = Chars[_randomNumberGenerator.Generate(0, Chars.Length)];
             }
 
             return new string(data);

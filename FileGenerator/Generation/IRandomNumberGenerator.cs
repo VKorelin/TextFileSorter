@@ -2,6 +2,6 @@
 {
     internal interface IRandomNumberGenerator
     {
-        int Generate(int max);
+        int Generate(int min, int max);
     }
 }
