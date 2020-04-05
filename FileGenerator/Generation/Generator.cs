@@ -27,14 +27,26 @@ namespace FileGenerator.Generation
 
             using (var fileWriter = _fileWrapperFactory.Invoke("data.txt"))
             {
-                while (currentFileSize < fileSize)
+                var canGenerate = true;
+                while (canGenerate)
                 {
-                    var bufferSize = Math.Min(fileSize - currentFileSize, DefaultBufferSize);
+                    var bufferSize = CalculateBufferSize(fileSize - currentFileSize, ref canGenerate);
                     var chunk = _chunkGenerator.GenerateNext(bufferSize);
                     fileWriter.WriteChunk(chunk);
                     currentFileSize += _encodingInfoProvider.GetBytesCount(chunk);
                 }
             }
+        }
+
+        private static long CalculateBufferSize(long freeSpace, ref bool canGenerate)
+        {
+            if (DefaultBufferSize < freeSpace - DefaultBufferSize)
+            {
+                return DefaultBufferSize;
+            }
+
+            canGenerate = false;
+            return freeSpace;
         }
     }
 }

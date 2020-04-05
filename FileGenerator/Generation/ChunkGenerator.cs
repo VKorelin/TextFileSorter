@@ -32,7 +32,6 @@ namespace FileGenerator.Generation
             {
                 var number = _randomNumberGenerator.Generate(0, (int) Math.Pow(10, entryInfo.NumberLength));
                 var line = _randomStringGenerator.Generate(entryInfo.LineLength);
-                
                 entries.Add(entryInfo.BuildEntry(number, line));
             }
 
@@ -44,19 +43,12 @@ namespace FileGenerator.Generation
             var entryInfos = new List<EntryInfo>();
             var diff = _encodingInfoProvider.GetStringLength(bufferSize);
 
-            while (true)
+            while (diff > 0)
             {
                 var nextLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, MaxEntrySize);
-                if (nextLength < diff - EntryInfo.MinLength)
-                {
-                    entryInfos.Add(CreateEntryInfo(nextLength));
-                    diff -= nextLength;
-                }
-                else
-                {
-                    entryInfos.Add(CreateEntryInfo((int) diff));
-                    break;
-                }
+                var totalLength = nextLength < diff - EntryInfo.MinLength ? nextLength : diff;
+                entryInfos.Add(CreateEntryInfo((int) totalLength));
+                diff -= nextLength;
             }
 
             return entryInfos;
@@ -65,7 +57,7 @@ namespace FileGenerator.Generation
         private static EntryInfo CreateEntryInfo(int totalLength)
         {
             var length = totalLength - EntryInfo.ServiceLength;
-            
+
             //Max number size that can be generated is MaxNumberSize. If entry line is short take only half of size for number (e.g. '4. a')
             var numberLength = Math.Min(length / 2, EntryInfo.MaxNumberLength);
 
