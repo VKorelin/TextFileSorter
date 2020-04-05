@@ -42,13 +42,13 @@ namespace FileGenerator.Generation
         {
             var entryInfos = new List<EntryInfo>();
             var diff = _encodingInfoProvider.GetStringLength(bufferSize);
-
+            
             while (diff > 0)
             {
                 var nextLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, MaxEntrySize);
                 var totalLength = nextLength < diff - EntryInfo.MinLength ? nextLength : diff;
                 entryInfos.Add(CreateEntryInfo((int) totalLength));
-                diff -= nextLength;
+                diff -= totalLength;
             }
 
             return entryInfos;

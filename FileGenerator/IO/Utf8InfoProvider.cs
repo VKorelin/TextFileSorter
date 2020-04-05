@@ -6,7 +6,7 @@ namespace FileGenerator.IO
     {
         public Encoding CurrentEncoding => Encoding.UTF8;
         
-        public long GetBytesCount(string str) => str.Length;
+        public long GetBytesCount(string str) => Encoding.UTF8.GetByteCount(str);
         
         public long GetBytesCount(long length) => length;
 
