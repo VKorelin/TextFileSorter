@@ -1,27 +1,31 @@
 ﻿using System;
-using System.Linq;
 
 namespace FileGenerator.Generation
 {
-    internal sealed class RandomStringGenerator : IRandomStringGenerator
+    internal sealed class EntryGenerator : IEntryGenerator
     {
         private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
         
         private readonly Random _random;
         
-        public RandomStringGenerator()
+        public EntryGenerator()
         {
             _random = new Random();
         }
         
-        public string Generate(int size)
+        public string Generate(long size)
         {
             if (size < 0)
             {
                 throw new ArgumentException("'size' could not be less than zero");
             }
             
-            return new string(Enumerable.Repeat(Chars, size).Select(s => s[_random.Next(s.Length)]).ToArray());
+            var data = new char[size];
+            for (var i = 0; i < size; i++)
+            {
+                data[i] = Chars[_random.Next(Chars.Length)];
+            }
+            return new string(data);
         }
     }
 }

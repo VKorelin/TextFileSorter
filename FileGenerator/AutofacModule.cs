@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using FileGenerator.Generation;
+using FileGenerator.IO;
 using FileGenerator.Validation;
 
 namespace FileGenerator
@@ -11,8 +12,10 @@ namespace FileGenerator
             builder.RegisterType<Bootstrapper>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<ArgumentsValidator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<Generator>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<EncodingFactory>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<RandomStringGenerator>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<EncodingInfoProviderFactory>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<ChunkGenerator>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<FileWriter>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<EntryGenerator>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

@@ -1,51 +1,38 @@
 ﻿using System;
-using System.IO;
-using System.Text;
+using FileGenerator.IO;
 
 namespace FileGenerator.Generation
 {
     public class Generator : IGenerator
     {
-        private const int BufferSize = 1024 * 1024 * 8;
-        
-        private readonly IRandomStringGenerator _stringGenerator;
-        private readonly Encoding _encoding;
-        private readonly IStringSizeCalculator _stringSizeCalculator;
+        private const int DefaultBufferSize = 1024 * 1024 * 8;
 
-        public Generator(IRandomStringGenerator stringGenerator, IEncodingFactory encodingFactory)
+        private readonly IChunkGenerator _chunkGenerator;
+        private readonly IEncodingInfoProvider _encodingInfoProvider;
+        private readonly Func<string, IFileWriter> _fileWrapperFactory;
+
+        public Generator(
+            IChunkGenerator chunkGenerator, 
+            IEncodingInfoProviderFactory encodingInfoProviderFactory, 
+            Func<string, IFileWriter> fileWrapperFactory)
         {
-            _stringGenerator = stringGenerator;
-            _encoding = encodingFactory.Encoding;
-            _stringSizeCalculator = encodingFactory.CreateCalculator();
+            _chunkGenerator = chunkGenerator;
+            _fileWrapperFactory = fileWrapperFactory;
+            _encodingInfoProvider = encodingInfoProviderFactory.Create();
         }
-        
+
         public void Generate(long fileSize)
         {
             long currentFileSize = 0;
-            
-            using (var stream = new FileStream("data.txt", FileMode.CreateNew))
+
+            using (var fileWriter = _fileWrapperFactory.Invoke("data.txt"))
             {
-                using (var streamWriter = new StreamWriter(stream, _encoding))
+                while (currentFileSize < fileSize)
                 {
-                    var stringBuilder = new StringBuilder();
-
-                    while (currentFileSize < fileSize)
-                    {
-                        var currentBufferSize = Math.Min(fileSize - currentFileSize, BufferSize);
-                        long sbSize = 0;
-                        
-                        while (sbSize < currentBufferSize)
-                        {
-                            stringBuilder.AppendLine(_stringGenerator.Generate(5));
-                            sbSize = _stringSizeCalculator.CalculateSize(stringBuilder);
-                        }
-
-                        currentFileSize += sbSize;
-                        streamWriter.WriteLine(stringBuilder);
-                        stringBuilder.Clear();
-                    }
-                    
-                    stream.Flush();
+                    var bufferSize = Math.Min(fileSize - currentFileSize, DefaultBufferSize);
+                    var chunk = _chunkGenerator.GenerateNext(bufferSize);
+                    fileWriter.WriteChunk(chunk);
+                    currentFileSize += _encodingInfoProvider.CalculateSize(chunk);
                 }
             }
         }

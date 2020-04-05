@@ -47,7 +47,7 @@ namespace FileGenerator.IntegrationTests
         public void GeneratesFileForDebug()
         {
             //var fileSize = 1024;
-            //var fileSize = 1024 * 8;
+            //var fileSize = 1024 * 16;
             //var fileSize = 1024 * 1024 * 32;
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
             _bootstrapper.Start(new[] {fileSize.ToString()});
