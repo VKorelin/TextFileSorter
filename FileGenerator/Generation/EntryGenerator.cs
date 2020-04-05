@@ -17,20 +17,20 @@ namespace FileGenerator.Generation
 
         public string Generate(int size)
         {
-            if (size < 4)
+            if (size < 6)
             {
-                throw new ArgumentException("Each entry line length should have at least 4 chars");
+                throw new ArgumentException("Each entry line length should have at least 6 chars");
             }
             
-            //Minis ' ' and '.' characters
-            size -= 2;
+            //Minis ' ', '.', '\n', '\r' characters
+            size -= 4;
 
             //Max number size that can be generated is MaxNumberSize. If entry line is short take only half of size for number (e.g. '4. a')
             var numberSize = Math.Min(size / 2, MaxNumberSize);
-            var number = _numberGenerator.Generate((int) Math.Pow(10, numberSize)).ToString();
+            var number = _numberGenerator.Generate(0, (int) Math.Pow(10, numberSize)).ToString();
 
             var line = _randomStringGenerator.Generate(size - number.Length);
-            return $"{number}. {line}";
+            return $"{number}. {line}\r\n";
         }
     }
 }

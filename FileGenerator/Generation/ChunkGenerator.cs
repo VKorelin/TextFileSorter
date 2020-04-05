@@ -29,7 +29,7 @@ namespace FileGenerator.Generation
 
             foreach (var length in randomLengths)
             {
-                stringBuilder.AppendLine(_entryGenerator.Generate(length));
+                stringBuilder.Append(_entryGenerator.Generate(length));
             }
 
             return stringBuilder.ToString();
