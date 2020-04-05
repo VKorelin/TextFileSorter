@@ -4,28 +4,33 @@ namespace FileGenerator.Generation
 {
     internal sealed class EntryGenerator : IEntryGenerator
     {
-        private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
+        private const int MaxNumberSize = 7;
         
-        private readonly Random _random;
-        
-        public EntryGenerator()
+        private readonly IRandomStringGenerator _randomStringGenerator;
+        private readonly IRandomNumberGenerator _numberGenerator;
+
+        public EntryGenerator(IRandomStringGenerator randomStringGenerator, IRandomNumberGenerator numberGenerator)
         {
-            _random = new Random();
+            _randomStringGenerator = randomStringGenerator;
+            _numberGenerator = numberGenerator;
         }
-        
-        public string Generate(long size)
+
+        public string Generate(int size)
         {
-            if (size < 0)
+            if (size < 4)
             {
-                throw new ArgumentException("'size' could not be less than zero");
+                throw new ArgumentException("Each entry line length should have at least 4 chars");
             }
             
-            var data = new char[size];
-            for (var i = 0; i < size; i++)
-            {
-                data[i] = Chars[_random.Next(Chars.Length)];
-            }
-            return new string(data);
+            //Minis ' ' and '.' characters
+            size -= 2;
+
+            //Max number size that can be generated is MaxNumberSize. If entry line is short take only half of size for number (e.g. '4. a')
+            var numberSize = Math.Min(size / 2, MaxNumberSize);
+            var number = _numberGenerator.Generate((int) Math.Pow(10, numberSize)).ToString();
+
+            var line = _randomStringGenerator.Generate(size - number.Length);
+            return $"{number}. {line}";
         }
     }
 }

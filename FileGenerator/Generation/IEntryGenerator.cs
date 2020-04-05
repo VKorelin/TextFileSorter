@@ -2,6 +2,6 @@
 {
     public interface IEntryGenerator
     {
-        string Generate(long size);
+        string Generate(int size);
     }
 }
