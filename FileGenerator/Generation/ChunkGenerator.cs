@@ -31,8 +31,8 @@ namespace FileGenerator.Generation
             {
                 stringBuilder.Append(_entryGenerator.Generate(length));
             }
-
-            return stringBuilder.ToString();
+            
+            return stringBuilder.Remove(stringBuilder.Length - 2, 2).ToString();
         }
 
         private IEnumerable<int> GetRandomEntryLengths(long bufferSize)
