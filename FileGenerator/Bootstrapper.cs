@@ -1,4 +1,5 @@
 ﻿using System;
+using FileGenerator.Domain;
 using FileGenerator.Generation;
 using FileGenerator.IO;
 using FileGenerator.Validation;

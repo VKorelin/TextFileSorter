@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FileGenerator.Generation
+namespace FileGenerator.Domain
 {
     public class EntryInfo
     {
@@ -37,8 +37,5 @@ namespace FileGenerator.Generation
         public int LineLength { get; }
         
         public bool IsDuplicated { get; }
-
-        public string BuildEntry(int number, string line)
-            => $"{number}. {line}";
     }
 }

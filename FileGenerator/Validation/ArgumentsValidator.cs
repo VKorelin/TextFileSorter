@@ -1,4 +1,4 @@
-﻿using FileGenerator.Generation;
+﻿using FileGenerator.Domain;
 using FileGenerator.IO;
 
 namespace FileGenerator.Validation
