@@ -11,7 +11,7 @@ namespace FileGenerator.IO
             _stream = new StreamWriter(path, false, encodingProvider.CurrentEncoding);
         }
         
-        public void WriteChunk(string chunk) => _stream.Write(chunk);
+        public void WriteChunk(string chunk) => _stream.WriteLine(chunk);
 
         public void Dispose() => _stream.Dispose();
     }
