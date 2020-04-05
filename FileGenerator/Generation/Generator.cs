@@ -32,7 +32,7 @@ namespace FileGenerator.Generation
                     var bufferSize = Math.Min(fileSize - currentFileSize, DefaultBufferSize);
                     var chunk = _chunkGenerator.GenerateNext(bufferSize);
                     fileWriter.WriteChunk(chunk);
-                    currentFileSize += _encodingInfoProvider.CalculateSize(chunk);
+                    currentFileSize += _encodingInfoProvider.GetBytesCount(chunk);
                 }
             }
         }

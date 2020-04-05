@@ -11,11 +11,13 @@ namespace FileGenerator
         
         private readonly IArgumentsValidator _argumentsValidator;
         private readonly IGenerator _generator;
+        private readonly IEncodingInfoProvider _encodingInfoProvider;
 
-        public Bootstrapper(IArgumentsValidator argumentsValidator, IGenerator generator)
+        public Bootstrapper(IArgumentsValidator argumentsValidator, IGenerator generator, IEncodingInfoProvider encodingInfoProvider)
         {
             _argumentsValidator = argumentsValidator;
             _generator = generator;
+            _encodingInfoProvider = encodingInfoProvider;
         }
         
         public GenerationResult Start(string[] args)
@@ -23,7 +25,7 @@ namespace FileGenerator
             Logger.Info("Validate arguments");
             if (!_argumentsValidator.IsValid(args, out var fileSize))
             {
-                Logger.Error("FileSize should be specified as first argument");
+                Logger.Error($"FileSize should be specified as first argument and be more than {_encodingInfoProvider.GetBytesCount(12)}");
                 return GenerationResult.ArgumentsInvalid;
             }
 
