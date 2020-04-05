@@ -1,5 +1,6 @@
 ﻿using System;
 using FileGenerator.Generation;
+using FileGenerator.IO;
 using FileGenerator.Validation;
 using NLog;
 

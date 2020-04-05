@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-namespace FileGenerator.IO
+namespace FileGenerator
 {
-    public interface IEncodingProvider
+    public interface IConfigurationProvider
     {
         Encoding Encoding { get; }
     }

@@ -13,12 +13,12 @@ namespace FileGenerator.Generation
 
         public Generator(
             IChunkGenerator chunkGenerator, 
-            IEncodingInfoProviderFactory encodingInfoProviderFactory, 
+            IEncodingInfoProvider encodingInfoProvider, 
             Func<string, IFileWriter> fileWrapperFactory)
         {
             _chunkGenerator = chunkGenerator;
             _fileWrapperFactory = fileWrapperFactory;
-            _encodingInfoProvider = encodingInfoProviderFactory.Create();
+            _encodingInfoProvider = encodingInfoProvider;
         }
 
         public void Generate(long fileSize)

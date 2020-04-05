@@ -14,12 +14,12 @@ namespace FileGenerator.Generation
 
         public ChunkGenerator(
             IEntryGenerator entryGenerator, 
-            IEncodingInfoProviderFactory encodingInfoProviderFactory,
+            IEncodingInfoProvider encodingInfoProvider,
             IRandomNumberGenerator randomNumberGenerator)
         {
             _entryGenerator = entryGenerator;
             _randomNumberGenerator = randomNumberGenerator;
-            _encodingInfoProvider = encodingInfoProviderFactory.Create();
+            _encodingInfoProvider = encodingInfoProvider;
         }
 
         public string GenerateNext(long bufferSize)

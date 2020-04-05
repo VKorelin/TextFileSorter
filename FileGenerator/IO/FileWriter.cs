@@ -6,9 +6,9 @@ namespace FileGenerator.IO
     {
         private readonly StreamWriter _stream;
         
-        public FileWriter(string path, IEncodingProvider encodingProvider)
+        public FileWriter(string path, IEncodingInfoProvider encodingProvider)
         {
-            _stream = new StreamWriter(path, false, encodingProvider.Encoding);
+            _stream = new StreamWriter(path, false, encodingProvider.CurrentEncoding);
         }
         
         public void WriteChunk(string chunk) => _stream.WriteLine(chunk);
