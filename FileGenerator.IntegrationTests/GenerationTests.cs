@@ -50,14 +50,17 @@ namespace FileGenerator.IntegrationTests
             return _container.Resolve<IBootstrapper>();
         }
 
-        private void AssertFileExists(long? size = null)
+        private static void AssertFileExists(long? size = null)
         {
             File.Exists(FileName).ShouldBeTrue();
 
             if (size.HasValue)
             {
                 var info = new FileInfo(FileName);
-                info.Length.ShouldBeInRange(size.Value - 100, size.Value + 100);
+                info.Length.ShouldBeInRange(
+                    size.Value - 100, 
+                    size.Value + 100, 
+                    $"FileSize should be around {size} but was {info.Length} (diff is {info.Length - size})");
             }
         }
 
@@ -101,6 +104,7 @@ namespace FileGenerator.IntegrationTests
         }
 
         [Test]
+        [Timeout(1000 * 60 * 3)]
         public void Generates10GbFileInUnicode()
         {
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
@@ -116,6 +120,7 @@ namespace FileGenerator.IntegrationTests
         }
 
         [Test]
+        [Timeout(1000 * 60 * 3)]
         public void Generates10GbFileInUtf8()
         {
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
