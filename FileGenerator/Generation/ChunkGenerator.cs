@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using FileGenerator.Domain;
 using FileGenerator.IO;
 
@@ -30,18 +29,29 @@ namespace FileGenerator.Generation
 
             var entries = new List<Entry>();
 
+            Entry entryToRepeat = null;
+
             foreach (var entryInfo in entryInfos)
             {
                 var number = GenerateNumber(entryInfo.NumberLength);
                 var line = _randomStringGenerator.Generate(entryInfo.LineLength);
-                entries.Add(new Entry(number, line, entryInfo));
+
+                var entry = new Entry(number, line, entryInfo);
+                entries.Add(entry);
+                
+                if (entryInfo.IsDuplicated)
+                {
+                    entryToRepeat = entry;
+                }
             }
 
-            var entryToRepeat = entries.SingleOrDefault(x => x.Info.IsDuplicated);
-            entries.Add(new Entry(
-                GenerateNumber(entryToRepeat.Info.NumberLength),
-                entryToRepeat.Line,
-                new EntryInfo(entryToRepeat.Info.NumberLength, entryToRepeat.Info.LineLength)));
+            if (entryToRepeat != null)
+            {
+                entries.Add(new Entry(
+                    GenerateNumber(entryToRepeat.Info.NumberLength),
+                    entryToRepeat.Line,
+                    new EntryInfo(entryToRepeat.Info.NumberLength, entryToRepeat.Info.LineLength)));
+            }
 
             return string.Join("\r\n", entries);
         }
