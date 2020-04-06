@@ -50,18 +50,15 @@ namespace FileGenerator.IntegrationTests
             return _container.Resolve<IBootstrapper>();
         }
 
-        private static void AssertFileExists(long? size = null)
+        private static void AssertFileExists(long size, long diff)
         {
             File.Exists(FileName).ShouldBeTrue();
 
-            if (size.HasValue)
-            {
-                var info = new FileInfo(FileName);
-                info.Length.ShouldBeInRange(
-                    size.Value - 100, 
-                    size.Value + 100, 
-                    $"FileSize should be around {size} but was {info.Length} (diff is {info.Length - size})");
-            }
+            var info = new FileInfo(FileName);
+            info.Length.ShouldBeInRange(
+                size - diff, 
+                size + diff, 
+                $"FileSize should be around {size} but was {info.Length} (diff is {info.Length - size})");
         }
 
         [Test]
@@ -85,7 +82,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize);
+            AssertFileExists(fileSize, 10);
         }
 
         [Test]
@@ -100,7 +97,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize);
+            AssertFileExists(fileSize, 10);
         }
 
         [Test]
@@ -116,7 +113,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists();
+            AssertFileExists(fileSize, 1024);
         }
 
         [Test]
@@ -132,7 +129,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists();
+            AssertFileExists(fileSize, 1024);
         }
     }
 }
