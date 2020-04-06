@@ -33,6 +33,7 @@ namespace FileGenerator
 
             try
             {
+                Logger.Info($"Start file generation. Encoding: {_encodingInfoProvider.CurrentEncoding}");
                 _generator.Generate(fileSize);
                 Logger.Info("File generated");
                 return GenerationResult.Success;

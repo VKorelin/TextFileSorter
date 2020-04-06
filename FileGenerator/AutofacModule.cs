@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Autofac;
+using FileGenerator.Configuration;
 using FileGenerator.Generation;
 using FileGenerator.IO;
 using FileGenerator.Validation;
@@ -16,6 +17,7 @@ namespace FileGenerator
             builder.RegisterType<Generator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<ChunkGenerator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<FileWriter>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<FilePathProvider>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<RandomNumberGenerator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<RandomStringGenerator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<ConfigurationProvider>().AsImplementedInterfaces().SingleInstance();
