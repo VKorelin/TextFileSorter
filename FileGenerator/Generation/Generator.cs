@@ -10,14 +10,17 @@ namespace FileGenerator.Generation
         private readonly IChunkGenerator _chunkGenerator;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
         private readonly Func<string, IFileWriter> _fileWrapperFactory;
+        private readonly IFilePathProvider _filePathProvider;
 
         public Generator(
             IChunkGenerator chunkGenerator, 
             IEncodingInfoProvider encodingInfoProvider, 
-            Func<string, IFileWriter> fileWrapperFactory)
+            Func<string, IFileWriter> fileWrapperFactory,
+            IFilePathProvider filePathProvider)
         {
             _chunkGenerator = chunkGenerator;
             _fileWrapperFactory = fileWrapperFactory;
+            _filePathProvider = filePathProvider;
             _encodingInfoProvider = encodingInfoProvider;
         }
 
@@ -25,7 +28,7 @@ namespace FileGenerator.Generation
         {
             long currentFileSize = 0;
 
-            using (var fileWriter = _fileWrapperFactory.Invoke("data.txt"))
+            using (var fileWriter = _fileWrapperFactory.Invoke(_filePathProvider.GetPath()))
             {
                 var canGenerate = true;
                 while (canGenerate)
