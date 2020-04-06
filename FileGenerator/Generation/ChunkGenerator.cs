@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Collections.Generic;
 using FileGenerator.Domain;
 using FileGenerator.IO;
@@ -27,33 +28,31 @@ namespace FileGenerator.Generation
         {
             var entryInfos = GetRandomEntryLengths(bufferSize);
 
-            var entries = new List<Entry>();
-
-            Entry entryToRepeat = null;
+            int? numberSizeToRepeat = null;
+			string lineToRepeat = null;
+			
+			var builder = new StringBuilder();
 
             foreach (var entryInfo in entryInfos)
             {
                 var number = GenerateNumber(entryInfo.NumberLength);
                 var line = _randomStringGenerator.Generate(entryInfo.LineLength);
-
-                var entry = new Entry(number, line, entryInfo);
-                entries.Add(entry);
+				
+				builder.Append($"{number}. {line}\r\n");
                 
                 if (entryInfo.IsDuplicated)
                 {
-                    entryToRepeat = entry;
+					numberSizeToRepeat = entryInfo.NumberLength;
+                    lineToRepeat = line;
                 }
             }
 
-            if (entryToRepeat != null)
+            if (numberSizeToRepeat.HasValue && lineToRepeat != null)
             {
-                entries.Add(new Entry(
-                    GenerateNumber(entryToRepeat.Info.NumberLength),
-                    entryToRepeat.Line,
-                    new EntryInfo(entryToRepeat.Info.NumberLength, entryToRepeat.Info.LineLength)));
+				builder.Append($"{GenerateNumber(numberSizeToRepeat.Value)}. {lineToRepeat}");
             }
 
-            return string.Join("\r\n", entries);
+            return builder.ToString();
         }
 
         private List<EntryInfo> GetRandomEntryLengths(long bufferSize)
