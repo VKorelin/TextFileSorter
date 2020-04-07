@@ -50,14 +50,14 @@ namespace FileGenerator.IntegrationTests
             return _container.Resolve<IBootstrapper>();
         }
 
-        private static void AssertFileExists(long size, long diff)
+        private static void AssertFileExists(long size, long allowedDiff)
         {
             File.Exists(FileName).ShouldBeTrue();
 
             var info = new FileInfo(FileName);
             info.Length.ShouldBeInRange(
-                size - diff, 
-                size + diff, 
+                size - allowedDiff, 
+                size + allowedDiff, 
                 $"FileSize should be around {size} but was {info.Length} (diff is {info.Length - size})");
         }
 
@@ -82,7 +82,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 10);
+            AssertFileExists(fileSize, 2);
         }
 
         [Test]
@@ -97,7 +97,37 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 10);
+            AssertFileExists(fileSize, 2);
+        }
+        
+        [Test]
+        public void Generates1GbFileInUnicode()
+        {
+            const long fileSize = 1073741824; //1024 * 1024 * 1024;
+            
+            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.Unicode);
+            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+
+            var bootstrapper = CreateInstance();
+
+            bootstrapper.Start(new[] {fileSize.ToString()});
+            
+            AssertFileExists(fileSize, 2);
+        }
+        
+        [Test]
+        public void Generates1GbFileInUtf8()
+        {
+            const long fileSize = 1073741824; //1024 * 1024 * 1024;
+
+            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.Unicode);
+            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+
+            var bootstrapper = CreateInstance();
+
+            bootstrapper.Start(new[] {fileSize.ToString()});
+            
+            AssertFileExists(fileSize, 2);
         }
 
         [Test]
@@ -114,10 +144,12 @@ namespace FileGenerator.IntegrationTests
             bootstrapper.Start(new[] {fileSize.ToString()});
 
             AssertFileExists(fileSize, 1024);
+            
+            AssertFileExists(fileSize, 2);
         }
 
         [Test]
-        [Timeout(1000 * 60 * 3)]
+        [Timeout(1000 * 60 * 6)]
         public void Generates10GbFileInUtf8()
         {
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
@@ -129,7 +161,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 1024);
+            AssertFileExists(fileSize, 2);
         }
     }
 }

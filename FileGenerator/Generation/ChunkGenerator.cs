@@ -49,7 +49,7 @@ namespace FileGenerator.Generation
 
             if (numberSizeToRepeat.HasValue && lineToRepeat != null)
             {
-				builder.Append($"{GenerateNumber(numberSizeToRepeat.Value)}. {lineToRepeat}");
+				builder.Append($"{GenerateNumber(numberSizeToRepeat.Value)}. {lineToRepeat}\r\n");
             }
 
             return builder.ToString();
