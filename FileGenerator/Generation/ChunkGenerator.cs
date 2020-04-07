@@ -95,6 +95,6 @@ namespace FileGenerator.Generation
         }
 
         private int GenerateNumber(int length)
-            => _randomNumberGenerator.Generate(0, (int) Math.Pow(10, length));
+            => _randomNumberGenerator.Generate((int) Math.Pow(10, length - 1), (int) Math.Pow(10, length));
     }
 }
