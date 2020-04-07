@@ -5,6 +5,11 @@ namespace FileGenerator.Domain
     public class EntryInfo
     {
         /// <summary>
+        /// Max Length of the Entry
+        /// </summary>
+        public const int MaxEntryLength = 100;
+        
+        /// <summary>
         /// Max Number is 10000000
         /// </summary>
         public const int MaxNumberLength = 7;
@@ -24,7 +29,7 @@ namespace FileGenerator.Domain
         /// </summary>
         public static readonly int MinLength = ServiceLength + 2;
 
-        public EntryInfo(int numberLength, int lineLength, bool isDuplicated = false)
+        public EntryInfo(int numberLength, int lineLength)
         {
             if (numberLength < 1)
                 throw new ArgumentException("NumberLength cannot be less than 1");
@@ -34,13 +39,13 @@ namespace FileGenerator.Domain
 
             NumberLength = numberLength;
             LineLength = lineLength;
-            IsDuplicated = isDuplicated;
         }
 
         public int NumberLength { get; }
         
         public int LineLength { get; }
-        
-        public bool IsDuplicated { get; }
+
+        public static string BuildEntry(int number, string line)
+            => $"{number}. {line}{NewLineEnding}";
     }
 }

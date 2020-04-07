@@ -1,8 +1,10 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using Autofac;
 using FileGenerator.Configuration;
+using FileGenerator.Domain;
 using FileGenerator.IO;
 using FileGenerator.Logging;
 using Moq;
@@ -38,8 +40,8 @@ namespace FileGenerator.IntegrationTests
         [TearDown]
         public void TearDown()
         {
-            if (Directory.Exists(DirectoryName))
-                Directory.Delete(DirectoryName, true);
+            // if (Directory.Exists(DirectoryName))
+            //     Directory.Delete(DirectoryName, true);
 
             _container?.Dispose();
         }
@@ -162,6 +164,35 @@ namespace FileGenerator.IntegrationTests
             bootstrapper.Start(new[] {fileSize.ToString()});
 
             AssertFileExists(fileSize, 3);
+        }
+
+        [Test]
+        public void GeneratesFileWithCorrectStructure()
+        {
+            const long fileSize = 1024 * 1024 * 16; //16Mb
+
+            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.UTF8);
+            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+
+            var bootstrapper = CreateInstance();
+
+            bootstrapper.Start(new[] {fileSize.ToString()});
+
+            AssertFileExists(fileSize, 3);
+
+            var entries = File.ReadAllLines(FileName);
+            foreach (var entry in entries)
+            {
+                var entryArr = entry.Split(". ");
+                entryArr.Length.ShouldBe(2);
+
+                var number = int.Parse(entryArr[0]);
+                number.ShouldBeInRange(1, (int) Math.Pow(10, EntryInfo.MaxNumberLength));
+
+                var lineLength = entryArr[1].Length;
+                lineLength.ShouldBeGreaterThanOrEqualTo(1);
+                lineLength.ShouldBeLessThanOrEqualTo(EntryInfo.MaxEntryLength - entryArr.Length - 2);
+            }
         }
     }
 }

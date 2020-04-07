@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using FileGenerator.Domain;
 
 namespace FileGenerator.Generation
 {
@@ -28,18 +29,18 @@ namespace FileGenerator.Generation
             // Generate first entry that string will be repeated
             var firstNumber = GenerateNumber(chunkInfo.RepeatedEntry.NumberLength);
             var lineToRepeat = _randomStringGenerator.Generate(chunkInfo.RepeatedEntry.LineLength);
-            builder.Append($"{firstNumber}. {lineToRepeat}\r\n");
+            builder.Append(EntryInfo.BuildEntry(firstNumber, lineToRepeat));
 
             foreach (var entryInfo in chunkInfo.EntryInfos)
             {
                 var number = GenerateNumber(entryInfo.NumberLength);
                 var line = _randomStringGenerator.Generate(entryInfo.LineLength);
-                builder.Append($"{number}. {line}\r\n");
+                builder.Append(EntryInfo.BuildEntry(number, line));
             }
             
             // Generate last entry with repeated string
             var lastNumber = GenerateNumber(chunkInfo.RepeatedEntry.NumberLength);
-            builder.Append($"{lastNumber}. {lineToRepeat}\r\n");
+            builder.Append(EntryInfo.BuildEntry(lastNumber, lineToRepeat));
 
             return builder.ToString();
         }

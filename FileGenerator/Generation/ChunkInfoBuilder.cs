@@ -7,8 +7,6 @@ namespace FileGenerator.Generation
 {
     internal sealed class ChunkInfoBuilder : IChunkInfoBuilder
     {
-        private const int MaxEntrySize = 100;
-
         private readonly IRandomNumberGenerator _randomNumberGenerator;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
         
@@ -24,35 +22,35 @@ namespace FileGenerator.Generation
             var diff = _encodingInfoProvider.GetStringLength(bufferSize);
 
             //First entry of chunk should be repeated
-            var repeatedEntryLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, MaxEntrySize);
+            var repeatedEntryLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, EntryInfo.MaxEntryLength);
             if (repeatedEntryLength * 2 >= diff - EntryInfo.MinLength)
             {
                 // In this case chunk will be small and contain only row and repeated row
-                return new ChunkInfo(new List<EntryInfo>(), CreateEntryInfo((int) diff / 2, true));
+                return new ChunkInfo(new List<EntryInfo>(), CreateEntryInfo((int) diff / 2));
             }
 
-            var repeatedEntryInfo = CreateEntryInfo(repeatedEntryLength, true);
+            var repeatedEntryInfo = CreateEntryInfo(repeatedEntryLength);
             diff -= repeatedEntryLength * 2;
 
             while (diff > 0)
             {
-                var nextLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, MaxEntrySize);
+                var nextLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, EntryInfo.MaxEntryLength);
                 var totalLength = nextLength < diff - EntryInfo.MinLength ? nextLength : diff;
-                entryInfos.Add(CreateEntryInfo((int) totalLength, false));
+                entryInfos.Add(CreateEntryInfo((int) totalLength));
                 diff -= totalLength;
             }
 
             return new ChunkInfo(entryInfos, repeatedEntryInfo);
         }
         
-        private static EntryInfo CreateEntryInfo(int totalLength, bool isDuplicated)
+        private static EntryInfo CreateEntryInfo(int totalLength)
         {
             var length = totalLength - EntryInfo.ServiceLength;
 
             //Max number size that can be generated is MaxNumberSize. If entry line is short take only half of size for number (e.g. '4. a')
             var numberLength = Math.Min(length / 2, EntryInfo.MaxNumberLength);
 
-            return new EntryInfo(numberLength, length - numberLength, isDuplicated);
+            return new EntryInfo(numberLength, length - numberLength);
         }
     }
 }
