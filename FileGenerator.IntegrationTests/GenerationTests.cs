@@ -82,7 +82,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 2);
+            AssertFileExists(fileSize, 3);
         }
 
         [Test]
@@ -97,7 +97,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 2);
+            AssertFileExists(fileSize, 3);
         }
         
         [Test]
@@ -112,7 +112,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
             
-            AssertFileExists(fileSize, 2);
+            AssertFileExists(fileSize, 3);
         }
         
         [Test]
@@ -127,7 +127,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
             
-            AssertFileExists(fileSize, 2);
+            AssertFileExists(fileSize, 3);
         }
 
         [Test]
@@ -145,7 +145,7 @@ namespace FileGenerator.IntegrationTests
 
             AssertFileExists(fileSize, 1024);
             
-            AssertFileExists(fileSize, 2);
+            AssertFileExists(fileSize, 3);
         }
 
         [Test]
@@ -161,7 +161,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 2);
+            AssertFileExists(fileSize, 3);
         }
     }
 }
