@@ -40,8 +40,8 @@ namespace FileGenerator.IntegrationTests
         [TearDown]
         public void TearDown()
         {
-            // if (Directory.Exists(DirectoryName))
-            //     Directory.Delete(DirectoryName, true);
+            if (Directory.Exists(DirectoryName))
+                Directory.Delete(DirectoryName, true);
 
             _container?.Dispose();
         }
