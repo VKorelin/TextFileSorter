@@ -29,6 +29,12 @@ namespace FileGenerator.Domain
         /// </summary>
         public static readonly int MinLength = ServiceLength + 2;
 
+        /// <summary>
+        /// Create information about each line in the file - entry
+        /// </summary>
+        /// <param name="numberLength">Length of the number part of entry</param>
+        /// <param name="lineLength">Length of the string part of entry</param>
+        /// <exception cref="ArgumentException">Exception will be thrown if line length or number length is less than 1</exception>
         public EntryInfo(int numberLength, int lineLength)
         {
             if (numberLength < 1)
@@ -41,10 +47,22 @@ namespace FileGenerator.Domain
             LineLength = lineLength;
         }
 
+        /// <summary>
+        /// Length of the number part of entry
+        /// </summary>
         public int NumberLength { get; }
         
+        /// <summary>
+        /// Length of the string part of entry
+        /// </summary>
         public int LineLength { get; }
 
+        /// <summary>
+        /// Build entry
+        /// </summary>
+        /// <param name="number">Entry number</param>
+        /// <param name="line">Entry string</param>
+        /// <returns>Entry itself</returns>
         public static string BuildEntry(int number, string line)
             => $"{number}. {line}{NewLineEnding}";
     }

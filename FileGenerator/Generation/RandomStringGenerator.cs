@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace FileGenerator.Generation
 {
+    ///<inheritdoc/>
     internal sealed class RandomStringGenerator : IRandomStringGenerator
     {
         private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
@@ -14,6 +15,7 @@ namespace FileGenerator.Generation
             _randomNumberGenerator = randomNumberGenerator;
         }
         
+        ///<inheritdoc/>
         public string Generate(long size)
         {
             if (size < 0)

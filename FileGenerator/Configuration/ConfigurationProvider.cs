@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace FileGenerator.Configuration
 {
+    ///<inheritdoc/>
     internal sealed class ConfigurationProvider : IConfigurationProvider
     {
         public ConfigurationProvider()
@@ -22,6 +23,7 @@ namespace FileGenerator.Configuration
             };
         }
 
+        ///<inheritdoc/>
         public Encoding Encoding { get; }
     }
 }

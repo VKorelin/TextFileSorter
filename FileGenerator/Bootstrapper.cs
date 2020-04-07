@@ -7,6 +7,7 @@ using NLog;
 
 namespace FileGenerator
 {
+    ///<inheritdoc/>
     internal sealed class Bootstrapper : IBootstrapper
     {
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
@@ -14,7 +15,7 @@ namespace FileGenerator
         private readonly IArgumentsValidator _argumentsValidator;
         private readonly IGenerator _generator;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
-
+        
         public Bootstrapper(IArgumentsValidator argumentsValidator, IGenerator generator, IEncodingInfoProvider encodingInfoProvider)
         {
             _argumentsValidator = argumentsValidator;
@@ -22,18 +23,19 @@ namespace FileGenerator
             _encodingInfoProvider = encodingInfoProvider;
         }
         
+        ///<inheritdoc/>
         public GenerationResult Start(string[] args)
         {
             Logger.Info("Validate arguments");
             if (!_argumentsValidator.IsValid(args, out var fileSize))
             {
-                Logger.Error($"FileSize should be specified as first argument and be more than {_encodingInfoProvider.GetBytesCount(EntryInfo.MinLength * 2)}");
+                Logger.Error($"FileSize should be specified as first argument and be more than {_encodingInfoProvider.GetBytesCountInStringLength(EntryInfo.MinLength * 2)}");
                 return GenerationResult.ArgumentsInvalid;
             }
 
             try
             {
-                Logger.Info($"Start file generation. Encoding: {_encodingInfoProvider.CurrentEncoding}");
+                Logger.Info($"Start file generation. File size: {fileSize}, Encoding: {_encodingInfoProvider.CurrentEncoding}");
                 _generator.Generate(fileSize);
                 Logger.Info("File generated");
                 return GenerationResult.Success;

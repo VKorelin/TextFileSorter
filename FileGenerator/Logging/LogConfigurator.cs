@@ -4,10 +4,16 @@ using NLog.Targets;
 
 namespace FileGenerator.Logging
 {
+    /// <summary>
+    /// Service class that configures logs
+    /// </summary>
     public static class LogConfigurator
     {
         private const string Layout = @"${date:format=HH\:mm\:ss\:ms}|${level}|TID=${threadid}:${threadname}|${message} ${exception:format=ToString}";
         
+        /// <summary>
+        /// Configure logging using NLog
+        /// </summary>
         public static void Configure()
         {
             var config = new LoggingConfiguration();

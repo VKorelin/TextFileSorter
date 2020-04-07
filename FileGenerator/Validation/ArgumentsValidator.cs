@@ -3,6 +3,7 @@ using FileGenerator.IO;
 
 namespace FileGenerator.Validation
 {
+    ///<inheritdoc/>
     internal sealed class ArgumentsValidator : IArgumentsValidator
     {
         private readonly IEncodingInfoProvider _encodingInfoProvider;
@@ -12,6 +13,7 @@ namespace FileGenerator.Validation
             _encodingInfoProvider = encodingInfoProvider;
         }
         
+        ///<inheritdoc/>
         public bool IsValid(string[] args, out long fileSize)
         {
             fileSize = -1;

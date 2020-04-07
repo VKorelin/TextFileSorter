@@ -2,6 +2,7 @@
 
 namespace FileGenerator.Generation
 {
+    ///<inheritdoc/>
     internal sealed class RandomNumberGenerator : IRandomNumberGenerator
     {
         private readonly Random _random;
@@ -11,12 +12,14 @@ namespace FileGenerator.Generation
             _random = new Random();
         }
 
+        ///<inheritdoc/>
         public int Generate(int min, int max)
             => _random.Next(min, max);
 
-        public byte[] GenerateNextBytes(long size)
+        ///<inheritdoc/>
+        public byte[] GenerateNextBytes(long length)
         {
-            var bytes = new byte[size];
+            var bytes = new byte[length];
             _random.NextBytes(bytes);
             return bytes;
         }

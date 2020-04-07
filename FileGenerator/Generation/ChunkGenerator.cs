@@ -4,6 +4,7 @@ using FileGenerator.Domain;
 
 namespace FileGenerator.Generation
 {
+    ///<inheritdoc/>
     internal sealed class ChunkGenerator : IChunkGenerator
     {
         private readonly IRandomNumberGenerator _randomNumberGenerator;
@@ -20,9 +21,10 @@ namespace FileGenerator.Generation
             _chunkInfoBuilder = chunkInfoBuilder;
         }
 
-        public string GenerateNext(long bufferSize)
+        ///<inheritdoc/>
+        public string GenerateNext(long chunkSize)
         {
-            var chunkInfo = _chunkInfoBuilder.Build(bufferSize);
+            var chunkInfo = _chunkInfoBuilder.Build(chunkSize);
             
             var builder = new StringBuilder();
             

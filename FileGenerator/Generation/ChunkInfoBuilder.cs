@@ -5,6 +5,7 @@ using FileGenerator.IO;
 
 namespace FileGenerator.Generation
 {
+    ///<inheritdoc/>
     internal sealed class ChunkInfoBuilder : IChunkInfoBuilder
     {
         private readonly IRandomNumberGenerator _randomNumberGenerator;
@@ -16,10 +17,11 @@ namespace FileGenerator.Generation
             _encodingInfoProvider = encodingInfoProvider;
         }
         
-        public ChunkInfo Build(long bufferSize)
+        ///<inheritdoc/>
+        public ChunkInfo Build(long chunkSize)
         {
             var entryInfos = new List<EntryInfo>();
-            var diff = _encodingInfoProvider.GetStringLength(bufferSize);
+            var diff = _encodingInfoProvider.GetStringLength(chunkSize);
 
             //First entry of chunk should be repeated
             var repeatedEntryLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, EntryInfo.MaxEntryLength);
