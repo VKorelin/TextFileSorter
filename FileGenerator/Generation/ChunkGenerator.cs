@@ -1,97 +1,47 @@
 ﻿using System;
 using System.Text;
-using System.Collections.Generic;
-using FileGenerator.Domain;
-using FileGenerator.IO;
 
 namespace FileGenerator.Generation
 {
     internal sealed class ChunkGenerator : IChunkGenerator
     {
-        private const int MaxEntrySize = 100;
-
         private readonly IRandomNumberGenerator _randomNumberGenerator;
         private readonly IRandomStringGenerator _randomStringGenerator;
-        private readonly IEncodingInfoProvider _encodingInfoProvider;
+        private readonly IChunkInfoBuilder _chunkInfoBuilder;
 
         public ChunkGenerator(
-            IEncodingInfoProvider encodingInfoProvider,
             IRandomNumberGenerator randomNumberGenerator,
-            IRandomStringGenerator randomStringGenerator)
+            IRandomStringGenerator randomStringGenerator,
+            IChunkInfoBuilder chunkInfoBuilder)
         {
             _randomNumberGenerator = randomNumberGenerator;
             _randomStringGenerator = randomStringGenerator;
-            _encodingInfoProvider = encodingInfoProvider;
+            _chunkInfoBuilder = chunkInfoBuilder;
         }
 
         public string GenerateNext(long bufferSize)
         {
-            var entryInfos = GetRandomEntryLengths(bufferSize);
+            var chunkInfo = _chunkInfoBuilder.Build(bufferSize);
+            
+            var builder = new StringBuilder();
+            
+            // Generate first entry that string will be repeated
+            var firstNumber = GenerateNumber(chunkInfo.RepeatedEntry.NumberLength);
+            var lineToRepeat = _randomStringGenerator.Generate(chunkInfo.RepeatedEntry.LineLength);
+            builder.Append($"{firstNumber}. {lineToRepeat}\r\n");
 
-            int? numberSizeToRepeat = null;
-			string lineToRepeat = null;
-			
-			var builder = new StringBuilder();
-
-            foreach (var entryInfo in entryInfos)
+            foreach (var entryInfo in chunkInfo.EntryInfos)
             {
                 var number = GenerateNumber(entryInfo.NumberLength);
                 var line = _randomStringGenerator.Generate(entryInfo.LineLength);
-				
-				builder.Append($"{number}. {line}\r\n");
-                
-                if (entryInfo.IsDuplicated)
-                {
-					numberSizeToRepeat = entryInfo.NumberLength;
-                    lineToRepeat = line;
-                }
+                builder.Append($"{number}. {line}\r\n");
             }
-
-            if (numberSizeToRepeat.HasValue && lineToRepeat != null)
-            {
-				builder.Append($"{GenerateNumber(numberSizeToRepeat.Value)}. {lineToRepeat}\r\n");
-            }
+            
+            // Generate last entry with repeated string
+            var lastNumber = GenerateNumber(chunkInfo.RepeatedEntry.NumberLength);
+            builder.Append($"{lastNumber}. {lineToRepeat}\r\n");
 
             return builder.ToString();
-        }
-
-        private List<EntryInfo> GetRandomEntryLengths(long bufferSize)
-        {
-            var entryInfos = new List<EntryInfo>();
-            var diff = _encodingInfoProvider.GetStringLength(bufferSize);
-
-            //First entry of chunk should be repeated
-            var repeatedEntryLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, MaxEntrySize);
-            if (repeatedEntryLength * 2 < diff - EntryInfo.MinLength)
-            {
-                entryInfos.Add(CreateEntryInfo(repeatedEntryLength, true));
-                diff -= repeatedEntryLength * 2;
-            }
-            else
-            {
-                entryInfos.Add(CreateEntryInfo((int) diff / 2, true));
-                return entryInfos;
-            }
-
-            while (diff > 0)
-            {
-                var nextLength = _randomNumberGenerator.Generate(EntryInfo.MinLength, MaxEntrySize);
-                var totalLength = nextLength < diff - EntryInfo.MinLength ? nextLength : diff;
-                entryInfos.Add(CreateEntryInfo((int) totalLength, false));
-                diff -= totalLength;
-            }
-
-            return entryInfos;
-        }
-
-        private static EntryInfo CreateEntryInfo(int totalLength, bool isDuplicated)
-        {
-            var length = totalLength - EntryInfo.ServiceLength;
-
-            //Max number size that can be generated is MaxNumberSize. If entry line is short take only half of size for number (e.g. '4. a')
-            var numberLength = Math.Min(length / 2, EntryInfo.MaxNumberLength);
-
-            return new EntryInfo(numberLength, length - numberLength, isDuplicated);
         }
 
         private int GenerateNumber(int length)
