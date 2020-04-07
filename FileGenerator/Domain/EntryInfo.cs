@@ -15,6 +15,11 @@ namespace FileGenerator.Domain
         public const int ServiceLength = 4;
 
         /// <summary>
+        /// New line in the end of each entry
+        /// </summary>
+        public const string NewLineEnding = "\r\n";
+
+        /// <summary>
         /// Shortest entry should have at least one digit and one character
         /// </summary>
         public static readonly int MinLength = ServiceLength + 2;
