@@ -13,5 +13,12 @@ namespace FileGenerator.Generation
 
         public int Generate(int min, int max)
             => _random.Next(min, max);
+
+        public byte[] GenerateNextBytes(long size)
+        {
+            var bytes = new byte[size];
+            _random.NextBytes(bytes);
+            return bytes;
+        }
     }
 }

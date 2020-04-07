@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace FileGenerator.Generation
 {
@@ -20,13 +21,8 @@ namespace FileGenerator.Generation
                 throw new ArgumentException("'size' could not be less than zero");
             }
 
-            var data = new char[size];
-            for (var i = 0; i < size; i++)
-            {
-                data[i] = Chars[_randomNumberGenerator.Generate(0, Chars.Length)];
-            }
-
-            return new string(data);
+            var data = _randomNumberGenerator.GenerateNextBytes(size);
+            return new string(data.Select(x => Chars[x % Chars.Length]).ToArray());
         }
     }
 }
