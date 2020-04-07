@@ -18,7 +18,7 @@ namespace FileGenerator.Generation
         ///<inheritdoc/>
         public string Generate(long size)
         {
-            if (size < 0)
+            if (size < 1)
             {
                 throw new ArgumentException("'size' could not be less than zero");
             }

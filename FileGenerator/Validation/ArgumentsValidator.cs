@@ -23,7 +23,7 @@ namespace FileGenerator.Validation
             }
 
             // Generated file should contain at least two duplicated rows
-            return long.TryParse(args[0], out fileSize) && _encodingInfoProvider.GetStringLength(fileSize) > EntryInfo.MinLength * 2;
+            return long.TryParse(args[0], out fileSize) && _encodingInfoProvider.GetStringLength(fileSize) >= EntryInfo.MinLength * 2;
         }
     }
 }

@@ -14,4 +14,8 @@
         <PackageReference Include="Shouldly" Version="4.0.0-beta0002" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\FileGenerator\FileGenerator.csproj" />
+    </ItemGroup>
+
 </Project>

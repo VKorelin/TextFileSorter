@@ -16,18 +16,18 @@ namespace FileGenerator.Generation
         private const int DefaultBufferSize = 1024 * 1024 * 8;
 
         private readonly IChunkGenerator _chunkGenerator;
-        private readonly Func<string, IFileWriter> _fileWrapperFactory;
+        private readonly Func<string, IFileWriter> _fileWriterFactory;
         private readonly IFilePathProvider _filePathProvider;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
 
         public Generator(
             IChunkGenerator chunkGenerator, 
-            Func<string, IFileWriter> fileWrapperFactory,
+            Func<string, IFileWriter> fileWriterFactory,
             IFilePathProvider filePathProvider,
             IEncodingInfoProvider encodingInfoProvider)
         {
             _chunkGenerator = chunkGenerator;
-            _fileWrapperFactory = fileWrapperFactory;
+            _fileWriterFactory = fileWriterFactory;
             _filePathProvider = filePathProvider;
             _encodingInfoProvider = encodingInfoProvider;
         }
@@ -38,7 +38,7 @@ namespace FileGenerator.Generation
             var fileName = _filePathProvider.GetPath();
             Logger.Info("File name is {fileName}", fileName);
             
-            using (var fileWriter = _fileWrapperFactory.Invoke(fileName))
+            using (var fileWriter = _fileWriterFactory.Invoke(fileName))
             {
                 long currentFileSize = 0;
                 var isLastChunk = false;
