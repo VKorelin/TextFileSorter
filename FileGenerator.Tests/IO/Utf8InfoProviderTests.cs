@@ -20,6 +20,14 @@ namespace FileGenerator.Tests.IO
         }
 
         [Test]
+        public void ReturnsTwoBytesAsAdditionalFileSize()
+        {
+            var instance = CreateInstance();
+            
+            instance.AdditionalFileSize.ShouldBe(3);
+        }
+
+        [Test]
         public void ReturnsTheSameNumberOfBytesForEachSymbolInString()
         {
             var instance = CreateInstance();

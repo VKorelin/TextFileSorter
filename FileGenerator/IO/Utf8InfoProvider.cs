@@ -11,6 +11,11 @@ namespace FileGenerator.IO
         /// UTF8 encoding
         /// </summary>
         public Encoding CurrentEncoding => Encoding.UTF8;
+
+        /// <summary>
+        /// Additional bytes in each file of UTF8
+        /// </summary>
+        public int AdditionalFileSize => 3;
         
         ///<inheritdoc/>
         public long GetBytesCountInStringLength(long length) => length;

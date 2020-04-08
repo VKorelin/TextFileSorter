@@ -18,6 +18,14 @@ namespace FileGenerator.Tests.IO
             
             instance.CurrentEncoding.ShouldBe(Encoding.Unicode);
         }
+        
+        [Test]
+        public void ReturnsThreeBytesAsAdditionalFileSize()
+        {
+            var instance = CreateInstance();
+            
+            instance.AdditionalFileSize.ShouldBe(2);
+        }
 
         [Test]
         public void ReturnsTheDoubleNumberOfBytesForEachSymbolInString()

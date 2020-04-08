@@ -52,15 +52,12 @@ namespace FileGenerator.IntegrationTests
             return _container.Resolve<IBootstrapper>();
         }
 
-        private static void AssertFileExists(long size, long allowedDiff)
+        private static void AssertFileExists(long size)
         {
             File.Exists(FileName).ShouldBeTrue();
 
             var info = new FileInfo(FileName);
-            info.Length.ShouldBeInRange(
-                size - allowedDiff, 
-                size + allowedDiff, 
-                $"FileSize should be around {size} but was {info.Length} (diff is {info.Length - size})");
+            info.Length.ShouldBe(size, $"FileSize should be {size} but was {info.Length}");
         }
 
         [Test]
@@ -84,7 +81,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 3);
+            AssertFileExists(fileSize);
         }
 
         [Test]
@@ -99,7 +96,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 3);
+            AssertFileExists(fileSize);
         }
         
         [Test]
@@ -114,7 +111,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
             
-            AssertFileExists(fileSize, 3);
+            AssertFileExists(fileSize);
         }
         
         [Test]
@@ -129,7 +126,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
             
-            AssertFileExists(fileSize, 3);
+            AssertFileExists(fileSize);
         }
 
         [Test]
@@ -145,9 +142,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 1024);
-            
-            AssertFileExists(fileSize, 3);
+            AssertFileExists(fileSize);
         }
 
         [Test]
@@ -163,7 +158,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 3);
+            AssertFileExists(fileSize);
         }
 
         [Test]
@@ -178,7 +173,7 @@ namespace FileGenerator.IntegrationTests
 
             bootstrapper.Start(new[] {fileSize.ToString()});
 
-            AssertFileExists(fileSize, 3);
+            AssertFileExists(fileSize);
 
             var entries = File.ReadAllLines(FileName);
             foreach (var entry in entries)

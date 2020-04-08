@@ -64,7 +64,9 @@ namespace FileGenerator.Generation
                 return DefaultBufferSize;
 
             isLastChunk = true;
-            return freeSpace + _encodingInfoProvider.GetBytesCountInStringLength(EntryInfo.NewLineEnding.Length);
+            
+            // In the end of each file there is no any new line chars but we should take into account that txt file has additional size
+            return freeSpace + _encodingInfoProvider.GetBytesCountInStringLength(EntryInfo.NewLineEnding.Length) - _encodingInfoProvider.AdditionalFileSize;
         }
 
         /// <summary>

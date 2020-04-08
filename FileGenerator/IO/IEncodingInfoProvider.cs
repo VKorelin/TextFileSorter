@@ -11,6 +11,11 @@ namespace FileGenerator.IO
         /// Encoding that will be used in generated file
         /// </summary>
         Encoding CurrentEncoding { get; }
+        
+        /// <summary>
+        /// Additional bytes in each file
+        /// </summary>
+        int AdditionalFileSize { get; }
 
         /// <summary>
         /// Get size of string of particular length
