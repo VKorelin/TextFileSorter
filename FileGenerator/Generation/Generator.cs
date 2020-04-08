@@ -1,5 +1,4 @@
 ﻿using System;
-using FileGenerator.Domain;
 using FileGenerator.IO;
 using NLog;
 
@@ -40,43 +39,32 @@ namespace FileGenerator.Generation
             
             using (var fileWriter = _fileWriterFactory.Invoke(fileName))
             {
+                fileSize = AdjustFileSize(fileSize);
                 long currentFileSize = 0;
-                var isLastChunk = false;
+                
                 do
                 {
-                    var chunkSize = CalculateChunkSize(fileSize - currentFileSize, ref isLastChunk);
+                    var chunkSize = CalculateChunkSize(fileSize - currentFileSize);
                     currentFileSize += chunkSize;
                     var chunk = _chunkGenerator.GenerateNext(chunkSize);
-                    fileWriter.Write(isLastChunk ? TruncateChunk(chunk) : chunk);
-                } while (!isLastChunk);
+                    fileWriter.Write(chunk);
+                } while (currentFileSize < fileSize);
             }
         }
+
+        /// <summary>
+        /// Take into account that txt file has additional size
+        /// </summary>
+        /// <returns>Adjusted file size</returns>
+        private long AdjustFileSize(long size)
+            => size - _encodingInfoProvider.AdditionalFileSize;
 
         /// <summary>
         /// Calculate size of chunk 
         /// </summary>
         /// <param name="freeSpace">Part of file in bytes that should be filled</param>
-        /// <param name="isLastChunk">Indicates if written chunk is last</param>
         /// <returns>Chunk size</returns>
-        private long CalculateChunkSize(long freeSpace, ref bool isLastChunk)
-        {
-            if (DefaultBufferSize <= freeSpace - DefaultBufferSize)
-                return DefaultBufferSize;
-
-            isLastChunk = true;
-            
-            // In the end of each file there is no any new line chars but we should take into account that txt file has additional size
-            return freeSpace + _encodingInfoProvider.GetBytesCountInStringLength(EntryInfo.NewLineEnding.Length) - _encodingInfoProvider.AdditionalFileSize;
-        }
-
-        /// <summary>
-        /// Remove last chars from chunk (new line chars)
-        /// </summary>
-        /// <param name="chunk">Chunk to be truncated</param>
-        /// <returns>Truncated chunk</returns>
-        private static string TruncateChunk(string chunk) 
-            => chunk.EndsWith(EntryInfo.NewLineEnding) 
-                ? chunk.Substring(0, chunk.Length - EntryInfo.NewLineEnding.Length) 
-                : chunk;
+        private static long CalculateChunkSize(long freeSpace) 
+            => DefaultBufferSize <= freeSpace - DefaultBufferSize ? DefaultBufferSize : freeSpace;
     }
 }

@@ -65,70 +65,48 @@ namespace FileGenerator.Tests.Generation
         }
 
         [Test]
-        public void GeneratesFileWithSmallSingleTruncatedFileChunk()
+        public void GeneratesFileWithSmallSingleChunk()
         {
-            _chunkGeneratorMock.Setup(x => x.GenerateNext(1026 - AdditionalFileSize)).Returns("line\r\n");
+            const int fileSize = 1024;
+            _chunkGeneratorMock.Setup(x => x.GenerateNext(fileSize - AdditionalFileSize)).Returns("line\r\n");
             var instance = CreateInstance();
             
-            instance.Generate(1024);
+            instance.Generate(fileSize);
             
-            _chunkGeneratorMock.Verify(x => x.GenerateNext(1026 - AdditionalFileSize), Times.Once);
-            _fileWriterMock.Verify(x => x.Write("line"), Times.Once());
-        }
-        
-        [Test]
-        public void GeneratesFileWithSmallSingleChunkWithoutTruncating()
-        {
-            _chunkGeneratorMock.Setup(x => x.GenerateNext(1026 - AdditionalFileSize)).Returns("line");
-            var instance = CreateInstance();
-            
-            instance.Generate(1024);
-            
-            _chunkGeneratorMock.Verify(x => x.GenerateNext(1026 - AdditionalFileSize), Times.Once);
-            _fileWriterMock.Verify(x => x.Write("line"), Times.Once());
+            _chunkGeneratorMock.Verify(x => x.GenerateNext(fileSize - AdditionalFileSize), Times.Once);
+            _fileWriterMock.Verify(x => x.Write("line\r\n"), Times.Once());
         }
 
         [Test]
-        public void GeneratesFileWithBigSingleChunkWithoutTruncating()
+        public void GeneratesFileWithBigSingleChunk()
         {
-            var bufferSize = 1024 * 1024 * 8;
-            _chunkGeneratorMock.Setup(x => x.GenerateNext(bufferSize + 12 - AdditionalFileSize)).Returns("line");
+            const int bufferSize = 1024 * 1024 * 8;
+            const int fileSize = bufferSize + 10;
+            _chunkGeneratorMock.Setup(x => x.GenerateNext(fileSize - AdditionalFileSize)).Returns("line\r\n");
             var instance = CreateInstance();
             
-            instance.Generate(bufferSize + 10);
+            instance.Generate(fileSize);
             
-            _chunkGeneratorMock.Verify(x => x.GenerateNext(bufferSize + 12 - AdditionalFileSize), Times.Once);
-            _fileWriterMock.Verify(x => x.Write("line"), Times.Once());
-        }
-        
-        [Test]
-        public void GeneratesFileWithBigSingleTruncatedFileChunk()
-        {
-            var bufferSize = 1024 * 1024 * 8;
-            _chunkGeneratorMock.Setup(x => x.GenerateNext(bufferSize + 12 - AdditionalFileSize)).Returns("line\r\n");
-            var instance = CreateInstance();
-            
-            instance.Generate(bufferSize + 10);
-            
-            _chunkGeneratorMock.Verify(x => x.GenerateNext(bufferSize + 12 - AdditionalFileSize), Times.Once);
-            _fileWriterMock.Verify(x => x.Write("line"), Times.Once());
+            _chunkGeneratorMock.Verify(x => x.GenerateNext(fileSize - AdditionalFileSize), Times.Once);
+            _fileWriterMock.Verify(x => x.Write("line\r\n"), Times.Once());
         }
 
         [Test]
-        public void GeneratesFileWithTwoChunksWithTruncating()
+        public void GeneratesFileWithTwoChunks()
         {
-            var bufferSize = 1024 * 1024 * 8;
-            _chunkGeneratorMock.Setup(x => x.GenerateNext(bufferSize)).Returns("line1\r\n");
-            _chunkGeneratorMock.Setup(x => x.GenerateNext(bufferSize + 2 - AdditionalFileSize)).Returns("line2\r\n");
+            const int bufferSize = 1024 * 1024 * 8;
+            _chunkGeneratorMock
+                .SetupSequence(x => x.GenerateNext(bufferSize))
+                .Returns("line1\r\n")
+                .Returns("line2\r\n");
             
             var instance = CreateInstance();
             
-            instance.Generate(bufferSize * 2);
+            instance.Generate(bufferSize * 2 + AdditionalFileSize);
             
-            _chunkGeneratorMock.Verify(x => x.GenerateNext(bufferSize), Times.Once);
-            _chunkGeneratorMock.Verify(x => x.GenerateNext(bufferSize + 2 - AdditionalFileSize), Times.Once);
+            _chunkGeneratorMock.Verify(x => x.GenerateNext(bufferSize), Times.Exactly(2));
             _fileWriterMock.Verify(x => x.Write("line1\r\n"), Times.Once());
-            _fileWriterMock.Verify(x => x.Write("line2"), Times.Once());
+            _fileWriterMock.Verify(x => x.Write("line2\r\n"), Times.Once());
         }
     }
 }
