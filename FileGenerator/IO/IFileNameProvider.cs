@@ -3,7 +3,7 @@
     /// <summary>
     /// Provide of generated file path and name
     /// </summary>
-    public interface IFilePathProvider
+    public interface IFileNameProvider
     {
         /// <summary>
         /// Get generated file path

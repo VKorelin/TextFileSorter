@@ -18,7 +18,7 @@ namespace FileGenerator
             builder.RegisterType<ChunkInfoBuilder>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<ChunkGenerator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<FileWriter>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<FilePathProvider>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<FileNameProvider>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<RandomNumberGenerator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<RandomStringGenerator>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<ConfigurationProvider>().AsImplementedInterfaces().SingleInstance();

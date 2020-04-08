@@ -11,5 +11,10 @@ namespace FileGenerator.Configuration
         /// Encoding that should be used in generated file
         /// </summary>
         Encoding Encoding { get; }
+        
+        /// <summary>
+        /// Generated file name
+        /// </summary>
+        string OutputFolder { get; }
     }
 }

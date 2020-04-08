@@ -17,25 +17,25 @@ namespace FileGenerator.Generation
 
         private readonly IChunkGenerator _chunkGenerator;
         private readonly Func<string, IFileWriter> _fileWriterFactory;
-        private readonly IFilePathProvider _filePathProvider;
+        private readonly IFileNameProvider _fileNameProvider;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
 
         public Generator(
             IChunkGenerator chunkGenerator, 
             Func<string, IFileWriter> fileWriterFactory,
-            IFilePathProvider filePathProvider,
+            IFileNameProvider fileNameProvider,
             IEncodingInfoProvider encodingInfoProvider)
         {
             _chunkGenerator = chunkGenerator;
             _fileWriterFactory = fileWriterFactory;
-            _filePathProvider = filePathProvider;
+            _fileNameProvider = fileNameProvider;
             _encodingInfoProvider = encodingInfoProvider;
         }
         
         ///<inheritdoc/>
         public void Generate(long fileSize)
         {
-            var fileName = _filePathProvider.GetPath();
+            var fileName = _fileNameProvider.GetPath();
             Logger.Info("File name is {fileName}", fileName);
             
             using (var fileWriter = _fileWriterFactory.Invoke(fileName))

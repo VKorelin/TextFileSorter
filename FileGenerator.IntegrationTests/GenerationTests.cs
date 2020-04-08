@@ -16,7 +16,7 @@ namespace FileGenerator.IntegrationTests
     [SuppressMessage("ReSharper", "PossibleUnintendedReferenceComparison")]
     public class GenerationTests
     {
-        private const string DirectoryName = "files";
+        private const string DirectoryName = "data";
         private static readonly string FileName = Path.Combine(DirectoryName, "testData.txt");
 
         private ContainerBuilder _containerBuilder;
@@ -30,9 +30,9 @@ namespace FileGenerator.IntegrationTests
             _containerBuilder = new ContainerBuilder();
             _containerBuilder.RegisterModule<AutofacModule>();
 
-            var filePathProviderMock = new Mock<IFilePathProvider>();
+            var filePathProviderMock = new Mock<IFileNameProvider>();
             filePathProviderMock.Setup(x => x.GetPath()).Returns(FileName);
-            _containerBuilder.RegisterInstance(filePathProviderMock.Object).As<IFilePathProvider>().SingleInstance();
+            _containerBuilder.RegisterInstance(filePathProviderMock.Object).As<IFileNameProvider>().SingleInstance();
 
             Directory.CreateDirectory(DirectoryName);
         }

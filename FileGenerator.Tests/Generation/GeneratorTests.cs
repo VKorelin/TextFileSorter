@@ -15,7 +15,7 @@ namespace FileGenerator.Tests.Generation
         private Mock<IChunkGenerator> _chunkGeneratorMock;
         private Mock<Func<string, IFileWriter>> _fileWriterFactoryMock;
         private Mock <IFileWriter> _fileWriterMock;
-        private Mock<IFilePathProvider> _filePathProviderMock;
+        private Mock<IFileNameProvider> _filePathProviderMock;
         private Mock<IEncodingInfoProvider> _encodingInfoProviderMock;
 
         [SetUp]
@@ -28,7 +28,7 @@ namespace FileGenerator.Tests.Generation
             _encodingInfoProviderMock.Setup(x => x.GetBytesCountInStringLength(2)).Returns(2);
             _encodingInfoProviderMock.SetupGet(x => x.AdditionalFileSize).Returns(1);
 
-            _filePathProviderMock = new Mock<IFilePathProvider>();
+            _filePathProviderMock = new Mock<IFileNameProvider>();
             _filePathProviderMock.Setup(x => x.GetPath()).Returns(FileName);
             
             
