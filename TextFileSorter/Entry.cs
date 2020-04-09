@@ -5,7 +5,7 @@ namespace TextFileSorter
 {
     public class Entry : IComparable<Entry>
     {
-        public Entry(string entry)
+        public static Entry Build(string entry)
         {
             var entryArr = entry.Split(". ");
 
@@ -19,8 +19,13 @@ namespace TextFileSorter
                 throw new ArgumentException($"Entry number should be integer but was {entryArr[0]}", nameof(entry));
             }
             
+            return new Entry(number, entryArr.Length > 2 ? string.Join(string.Empty, entryArr.Skip(1)) : entryArr[1]);
+        }
+        
+        private Entry(int number, string line)
+        {
             Number = number;
-            Line = entryArr.Length > 2 ? string.Join(string.Empty, entryArr.Skip(1)) : entryArr[1];
+            Line = line;
         }
 
         public int Number { get; }
@@ -31,14 +36,17 @@ namespace TextFileSorter
         {
             if (other == null)
             {
-                return -1;
+                return 1;
             }
 
             var lineCompareResult = string.CompareOrdinal(Line, other.Line);
             return lineCompareResult == 0 ? Number.CompareTo(other.Number) : lineCompareResult;
         }
-
+        
         public override string ToString()
             => $"{Number}. {Line}";
+        
+        public string BuildReverseEntry()
+            => $"{Line}. {Number}";
     }
 }

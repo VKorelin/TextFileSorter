@@ -9,101 +9,107 @@ namespace TextFileSorter.Sorting
         private const int RecordSize = 100;
         private const int MaxUsage = 500000000;
         private const double RecordOverhead = 7.5;
-        
+
         private readonly IConfigurationProvider _configurationProvider;
 
         public ChunkMergeService(IConfigurationProvider configurationProvider)
         {
             _configurationProvider = configurationProvider;
         }
-        
-        public void MergeChunks(IList<string> chunkNames, string outputFileName)
+
+        public void MergeChunks(IList<string> paths, string outputFileName)
         {
-            var chunksNumber = chunkNames.Count;
-            var bufferSize = MaxUsage / chunksNumber;
+            int chunks = paths.Count; // Number of chunks
+            int recordsize = 100; // estimated record size
+            int records = 10000000; // estimated total # records
+            int maxusage = 500000000; // max memory usage
+            int buffersize = maxusage / chunks; // bytes of each queue
+            double recordoverhead = 7.5; // The overhead of using Queue<>
+            int bufferlen = (int) (buffersize / recordsize / recordoverhead); // number of records in each queue
 
-            // ReSharper disable once PossibleLossOfFraction
-            var bufferLength = (int) (bufferSize / RecordSize / RecordOverhead);
+            // Open the files
+            StreamReader[] readers = new StreamReader[chunks];
+            for (int i = 0; i < chunks; i++)
+                readers[i] = new StreamReader(paths[i], _configurationProvider.Encoding);
 
-            var readers = new StreamReader[chunksNumber];
-            var queues = new Queue<Entry>[chunksNumber];
-            for (var i = 0; i < chunksNumber; i++)
-            {
-                readers[i] = new StreamReader(chunkNames[i], _configurationProvider.Encoding);
-                queues[i] = new Queue<Entry>(bufferLength);
-                LoadQueue(queues[i], readers[i], bufferLength);
-            }
+            // Make the queues
+            Queue<string>[] queues = new Queue<string>[chunks];
+            for (int i = 0; i < chunks; i++)
+                queues[i] = new Queue<string>(bufferlen);
 
-            Merge(chunksNumber, queues, readers, bufferLength, outputFileName);
-            DeleteChunks(chunkNames, readers);
-        }
+            // Load the queues
+            for (int i = 0; i < chunks; i++)
+                LoadQueue(queues[i], readers[i], bufferlen);
 
-        private void Merge(
-            int chunksNumber, 
-            IList<Queue<Entry>> queues, 
-            IReadOnlyList<StreamReader> readers, 
-            int bufferLen, 
-            string outputFileName)
-        {
-            using var writer = new StreamWriter(outputFileName, false, _configurationProvider.Encoding);
+            // Merge!
+            StreamWriter sw = new StreamWriter(outputFileName, false, _configurationProvider.Encoding);
+            int lowest_index, j, progress = 0;
+            string lowest_value;
 
             while (true)
             {
-                var lowestIndex = -1;
-                Entry lowestValue = null;
-                for (var j = 0; j < chunksNumber; j++)
+                // Find the chunk with the lowest value
+                lowest_index = -1;
+                lowest_value = "";
+                for (j = 0; j < chunks; j++)
                 {
                     if (queues[j] != null)
                     {
-                        if (lowestIndex < 0 || queues[j].Peek().CompareTo(lowestValue) < 0)
+                        if (lowest_index < 0 || string.CompareOrdinal(queues[j].Peek(), lowest_value) < 0)
                         {
-                            lowestIndex = j;
-                            lowestValue = queues[j].Peek();
+                            lowest_index = j;
+                            lowest_value = queues[j].Peek();
                         }
                     }
                 }
-
-                if (lowestIndex == -1)
+                
+                // Was nothing found in any queue? We must be done then.
+                if (lowest_index == -1)
                 {
                     break;
                 }
 
-                writer.WriteLine(lowestValue.ToString());
-                queues[lowestIndex].Dequeue();
-                
-                if (queues[lowestIndex].Count == 0)
+                // Output it
+                sw.WriteLine(ReverseEntry(lowest_value));
+
+                // Remove from queue
+                queues[lowest_index].Dequeue();
+                // Have we emptied the queue? Top it up
+                if (queues[lowest_index].Count == 0)
                 {
-                    LoadQueue(queues[lowestIndex], readers[lowestIndex], bufferLen);
-                    
-                    if (queues[lowestIndex].Count == 0)
+                    LoadQueue(queues[lowest_index],
+                        readers[lowest_index], bufferlen);
+                    // Was there nothing left to read?
+                    if (queues[lowest_index].Count == 0)
                     {
-                        queues[lowestIndex] = null;
+                        queues[lowest_index] = null;
                     }
                 }
             }
 
-            writer.Close();
-        }
+            sw.Close();
 
-        private static void LoadQueue(Queue<Entry> queue, TextReader file, int records)
-        {
-            for (var i = 0; i < records; i++)
-            {
-                if (file.Peek() < 0) 
-                    break;
-
-                var entry = new Entry(file.ReadLine());
-                queue.Enqueue(entry);
-            }
-        }
-
-        private static void DeleteChunks(IList<string> chunkNames, IList<StreamReader> readers)
-        {
-            for (var i = 0; i < chunkNames.Count; i++)
+            // Close and delete the files
+            for (int i = 0; i < chunks; i++)
             {
                 readers[i].Close();
-                File.Delete(chunkNames[i]);
+                File.Delete(paths[i]);
             }
+        }
+
+        static void LoadQueue(Queue<string> queue, StreamReader file, int records)
+        {
+            for (int i = 0; i < records; i++)
+            {
+                if (file.Peek() < 0) break;
+                queue.Enqueue(file.ReadLine());
+            }
+        }
+
+        private string ReverseEntry(string entry)
+        {
+            var arr = entry.Split(".");
+            return $"{arr[1]}. {arr[0]}";
         }
     }
 }

@@ -11,8 +11,6 @@ namespace TextFileSorter.Sorting
 {
     public class SortedChunksService : ISortedChunksService
     {
-        private static readonly char[] SplitChars = {'\r', '\n'};
-
         private readonly Func<string, IChunkFileReader> _chunkFileReaderFactory;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
         
@@ -77,13 +75,13 @@ namespace TextFileSorter.Sorting
                 try
                 {
                     var entries = _chunksQueue.Take()
-                        .Select(x => new Entry(x))
+                        .Select(Entry.Build)
                         .OrderBy(x => x);
             
                     var chunkIdx = Interlocked.Increment(ref _chunkNumber);
             
                     var savePath = Path.Combine(_chunksFolder, $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
-                    File.WriteAllLines(savePath, entries.Select(x => x.ToString()), _encodingInfoProvider.Encoding);
+                    File.WriteAllLines(savePath, entries.Select(x => x.BuildReverseEntry()), _encodingInfoProvider.Encoding);
                     _chunkNames.Add(savePath);
                 }
                 catch (InvalidOperationException)
