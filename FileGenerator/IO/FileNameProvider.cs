@@ -11,9 +11,10 @@ namespace FileGenerator.IO
         
         public FileNameProvider(IConfigurationProvider configurationProvider)
         {
-            _outputFolder = configurationProvider.OutputFolder;
+            var outputPath = configurationProvider.OutputFolder;
+            _outputFolder = Path.IsPathRooted(outputPath) ? outputPath : Path.Combine(Directory.GetCurrentDirectory(), outputPath);
 
-            if (Directory.Exists(_outputFolder))
+            if (!Directory.Exists(_outputFolder))
             {
                 Directory.CreateDirectory(_outputFolder);
             }
