@@ -1,8 +1,5 @@
 FileGenerator - generates random file of specified length.
-Format of generated file:
-"{Number}. {Line}"
-..................
-"{Number}. {Line}"
+Format of generated file: lines of "{Number}. {Line}".
 
 Number in [1, 999999999]. Max entry length is 100.
 
