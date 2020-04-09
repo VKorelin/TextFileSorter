@@ -6,10 +6,6 @@ namespace TextFileSorter.Sorting
 {
     internal sealed class ChunkMergeService : IChunkMergeService
     {
-        private const int RecordSize = 100;
-        private const int MaxUsage = 500000000;
-        private const double RecordOverhead = 7.5;
-
         private readonly IConfigurationProvider _configurationProvider;
 
         public ChunkMergeService(IConfigurationProvider configurationProvider)
@@ -21,8 +17,9 @@ namespace TextFileSorter.Sorting
         {
             var chunksCount = chunkNames.Count;
 
-            // ReSharper disable once PossibleLossOfFraction
-            var bufferLength = (int) (MaxUsage / chunksCount / RecordSize / RecordOverhead);
+            var bytesPerChunk = _configurationProvider.RamLimit / chunksCount;
+            const int maxEntryLength = 100;
+            var bufferLength = (int) (bytesPerChunk / maxEntryLength);
 
             var chunkReaders = new StreamReader[chunksCount];
             var chunkQueues = new Queue<string>[chunksCount];

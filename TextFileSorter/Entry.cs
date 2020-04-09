@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace TextFileSorter
 {
+    /// <summary>
+    /// Represents line in the file
+    /// </summary>
     public struct Entry : IComparable<Entry>
     {
         public static Entry Build(string entry)
@@ -17,6 +20,12 @@ namespace TextFileSorter
             if (!int.TryParse(entryArr[0], out var number) && number < 1000000000)
             {
                 throw new ArgumentException($"Entry number should be integer less than 1000000000 but was {entryArr[0]}", nameof(entry));
+            }
+
+            var line = entryArr.Length > 2 ? string.Join(string.Empty, entryArr.Skip(1)) : entryArr[1];
+            if (line.Any(x => x == '.'))
+            {
+                throw new ArgumentException("Line should not contain any dots ('.')");
             }
             
             return new Entry(number, entryArr.Length > 2 ? string.Join(string.Empty, entryArr.Skip(1)) : entryArr[1]);

@@ -12,9 +12,9 @@ namespace TextFileSorter.Sorting
     public class SortedChunksService : ISortedChunksService
     {
         private readonly Func<string, IChunkFileReader> _chunkFileReaderFactory;
-        private readonly IEncodingInfoProvider _encodingInfoProvider;
         
         private readonly string _fileName;
+        private readonly IConfigurationProvider _configurationProvider;
         private readonly string _fileNameWithoutExtension;
         public readonly string _chunksFolder;
         
@@ -27,11 +27,10 @@ namespace TextFileSorter.Sorting
         public SortedChunksService(
             string fileName,
             IConfigurationProvider configurationProvider,
-            IEncodingInfoProvider encodingInfoProvider,
             Func<string, IChunkFileReader> chunkFileReaderFactory)
         {
             _fileName = fileName;
-            _encodingInfoProvider = encodingInfoProvider;
+            _configurationProvider = configurationProvider;
             _fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_fileName);
             _chunkFileReaderFactory = chunkFileReaderFactory;
             
@@ -42,15 +41,15 @@ namespace TextFileSorter.Sorting
             }
             
             _chunkNames = new ConcurrentBag<string>();
-            _chunksQueue = new BlockingCollection<IList<string>>(new ConcurrentQueue<IList<string>>(), configurationProvider.ThreadCount);
+            _chunksQueue = new BlockingCollection<IList<string>>(new ConcurrentQueue<IList<string>>(), configurationProvider.ThreadCount - 1);
             
-            _sortTasks = new Task[configurationProvider.ThreadCount];
+            _sortTasks = new Task[configurationProvider.ThreadCount - 1];
             for (var i = 0; i < _sortTasks.Length; i++)
             {
                 _sortTasks[i] = Task.Run(SortNext);
             }
         }
-        
+
         public IList<string> CreateSortedChunks()
         {
             using (var reader = _chunkFileReaderFactory(_fileName))
@@ -81,7 +80,7 @@ namespace TextFileSorter.Sorting
                     var chunkIdx = Interlocked.Increment(ref _chunkNumber);
             
                     var savePath = Path.Combine(_chunksFolder, $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
-                    File.WriteAllLines(savePath, entries.Select(x => x.ToStringReversed()), _encodingInfoProvider.Encoding);
+                    File.WriteAllLines(savePath, entries.Select(x => x.ToStringReversed()), _configurationProvider.Encoding);
                     _chunkNames.Add(savePath);
                 }
                 catch (InvalidOperationException)

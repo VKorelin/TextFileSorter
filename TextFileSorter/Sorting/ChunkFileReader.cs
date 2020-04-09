@@ -7,12 +7,14 @@ namespace TextFileSorter.Sorting
     internal sealed class ChunkFileReader : IChunkFileReader
     {
         private readonly StreamReader _reader;
-        private readonly long _chunkSize;
+        private readonly long _chunkLength;
         
-        public ChunkFileReader(string fileName, IEncodingInfoProvider encodingInfoProvider)
+        public ChunkFileReader(string fileName, IConfigurationProvider configurationProvider)
         {
-            _chunkSize = encodingInfoProvider.BufferLength;
-            _reader = new StreamReader(fileName, encodingInfoProvider.Encoding);
+            var encoding = configurationProvider.Encoding;
+            
+            _chunkLength = encoding.GetMaxCharCount((int) configurationProvider.RamLimit / configurationProvider.ThreadCount);
+            _reader = new StreamReader(fileName, encoding);
         }
         
         public ReadChunkResult ReadNextChunk()
@@ -20,7 +22,7 @@ namespace TextFileSorter.Sorting
             var lines = new List<string>();
             long currentLength = 0;
             
-            while (currentLength < _chunkSize)
+            while (currentLength < _chunkLength)
             {
                 var line = _reader.ReadLine();
 

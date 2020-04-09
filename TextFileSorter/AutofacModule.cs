@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using Autofac;
+﻿using Autofac;
 using TextFileSorter.Configuration;
 using TextFileSorter.Sorting;
 using TextFileSorter.Validation;
@@ -13,17 +11,6 @@ namespace TextFileSorter
         {
             // Configuration
             builder.RegisterType<ConfigurationProvider>().AsImplementedInterfaces().SingleInstance();
-            builder.Register<IEncodingInfoProvider>(x =>
-                {
-                    var config = x.Resolve<IConfigurationProvider>();
-                    if (config.Encoding.Equals(Encoding.Unicode))
-                        return new UnicodeInfoProvider(config);
-                    if (config.Encoding.Equals(Encoding.UTF8))
-                        return new Utf8InfoProvider(config);
-                    throw new Exception($"Unsupported encoding type: {config.Encoding}");
-                })
-                .AsImplementedInterfaces()
-                .SingleInstance();
             
             // Sorting
             builder.RegisterType<ChunkFileReader>().AsImplementedInterfaces().SingleInstance().InstancePerDependency();

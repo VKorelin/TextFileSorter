@@ -28,12 +28,14 @@ namespace TextFileSorter.Configuration
             }
         }
         
-        public int ChunkSize => 1024 * 1024 * 128;
-
-        public int ThreadCount => 4;
-
         public Encoding Encoding { get; }
         
         public string OutputFolder { get; }
+
+        ///<inheritdoc/>
+        public long RamLimit => 1024 * 1024 * 512;
+
+        ///<inheritdoc/>
+        public int ThreadCount => Environment.ProcessorCount / 2;
     }
 }
