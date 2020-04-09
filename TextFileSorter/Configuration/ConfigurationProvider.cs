@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 
@@ -21,11 +22,15 @@ namespace TextFileSorter.Configuration
             };
             
             OutputFolder = config["OutputFolder"];
+            if (!Directory.Exists(OutputFolder))
+            {
+                Directory.CreateDirectory(OutputFolder);
+            }
         }
         
-        public int ChunkSize => 1024 * 1024 * 100;
+        public int ChunkSize => 1024 * 1024 * 128;
 
-        public int ThreadCount => 2;
+        public int ThreadCount => 4;
 
         public Encoding Encoding { get; }
         

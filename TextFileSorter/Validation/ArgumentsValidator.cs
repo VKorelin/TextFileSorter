@@ -24,8 +24,6 @@ namespace TextFileSorter.Validation
                 return false;
             }
 
-            Logger.Info("Arguments are valid");
-
             return true;
         }
     }

@@ -51,7 +51,7 @@ namespace TextFileSorter.Sorting
         {
             var fileNameWithoutExt = Path.GetFileNameWithoutExtension(sourceFileName);
             var ext = Path.GetExtension(sourceFileName);
-            return Path.Combine(_outputFileName, $"{fileNameWithoutExt}_sorted.{ext}");
+            return Path.Combine(_outputFileName, $"{fileNameWithoutExt}_sorted{ext}");
         }
     }
 }
