@@ -1,14 +1,16 @@
-﻿namespace TextFileSorter.Sorting
+﻿using System.Collections.Generic;
+
+namespace TextFileSorter.Sorting
 {
     public class ReadChunkResult
     {
-        public ReadChunkResult(byte[] chunk, bool isLastChunk)
+        public ReadChunkResult(IList<string> chunk, bool isLastChunk)
         {
             Chunk = chunk;
             IsLastChunk = isLastChunk;
         }
 
-        public byte[] Chunk { get; }
+        public IList<string> Chunk { get; }
 
         public bool IsLastChunk { get; }
     }

@@ -6,6 +6,6 @@ namespace TextFileSorter.Configuration
     {
         Encoding Encoding { get; }
 
-        string GetString(byte[] bytes);
+        long BufferLength { get; }
     }
 }

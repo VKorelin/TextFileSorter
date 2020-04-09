@@ -17,9 +17,9 @@ namespace TextFileSorter
                 {
                     var config = x.Resolve<IConfigurationProvider>();
                     if (config.Encoding.Equals(Encoding.Unicode))
-                        return new UnicodeInfoProvider();
+                        return new UnicodeInfoProvider(config);
                     if (config.Encoding.Equals(Encoding.UTF8))
-                        return new Utf8InfoProvider();
+                        return new Utf8InfoProvider(config);
                     throw new Exception($"Unsupported encoding type: {config.Encoding}");
                 })
                 .AsImplementedInterfaces()

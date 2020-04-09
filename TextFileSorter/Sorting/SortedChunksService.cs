@@ -20,7 +20,7 @@ namespace TextFileSorter.Sorting
         private readonly string _fileNameWithoutExtension;
         public readonly string _chunksFolder;
         
-        private readonly BlockingCollection<string[]> _chunksQueue;
+        private readonly BlockingCollection<IList<string>> _chunksQueue;
         private readonly ConcurrentBag<string> _chunkNames;
         private readonly Task[] _sortTasks;
 
@@ -44,7 +44,7 @@ namespace TextFileSorter.Sorting
             }
             
             _chunkNames = new ConcurrentBag<string>();
-            _chunksQueue = new BlockingCollection<string[]>(new ConcurrentQueue<string[]>(), configurationProvider.ThreadCount);
+            _chunksQueue = new BlockingCollection<IList<string>>(new ConcurrentQueue<IList<string>>(), configurationProvider.ThreadCount);
             
             _sortTasks = new Task[configurationProvider.ThreadCount];
             for (var i = 0; i < _sortTasks.Length; i++)
@@ -58,20 +58,10 @@ namespace TextFileSorter.Sorting
             using (var reader = _chunkFileReaderFactory(_fileName))
             {
                 ReadChunkResult nextChunk;
-                var shift = 0;
                 do
                 {
-                    nextChunk = reader.ReadNextChunk(shift);
-                    var chunkString = _encodingInfoProvider.GetString(nextChunk.Chunk);
-
-                    IEnumerable<string> lines = chunkString.Split(SplitChars, StringSplitOptions.RemoveEmptyEntries);
-                    if (!nextChunk.IsLastChunk && lines.Any())
-                    {
-                        shift = - lines.Last().Length * 2;
-                        lines = lines.SkipLast(1);
-                    }
-
-                    _chunksQueue.Add(lines.ToArray());
+                    nextChunk = reader.ReadNextChunk();
+                    _chunksQueue.Add(nextChunk.Chunk);
                 } while (!nextChunk.IsLastChunk);
             }
 

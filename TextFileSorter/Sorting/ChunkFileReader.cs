@@ -1,29 +1,39 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.IO;
 using TextFileSorter.Configuration;
 
 namespace TextFileSorter.Sorting
 {
     internal sealed class ChunkFileReader : IChunkFileReader
     {
-        private readonly FileStream _reader;
-        private readonly int _chunkSize;
+        private readonly StreamReader _reader;
+        private readonly long _chunkSize;
         
-        public ChunkFileReader(string fileName, IConfigurationProvider configurationProvider)
+        public ChunkFileReader(string fileName, IEncodingInfoProvider encodingInfoProvider)
         {
-            _chunkSize = configurationProvider.ChunkSize;
-            _reader = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+            _chunkSize = encodingInfoProvider.BufferLength;
+            _reader = new StreamReader(fileName, encodingInfoProvider.Encoding);
         }
         
-        public ReadChunkResult ReadNextChunk(int shift)
+        public ReadChunkResult ReadNextChunk()
         {
-            _reader.Seek(_reader.Position + shift, SeekOrigin.Begin);
+            var lines = new List<string>();
+            long currentLength = 0;
             
-            var chunk = new byte[_chunkSize];
-            var bytesRead = _reader.Read(chunk, 0, _chunkSize);
-            return _reader.Position == _reader.Length 
-                ? new ReadChunkResult(chunk.Take(bytesRead).ToArray(), true) 
-                : new ReadChunkResult(chunk, false);
+            while (currentLength < _chunkSize)
+            {
+                var line = _reader.ReadLine();
+
+                if (line == null)
+                {
+                    return new ReadChunkResult(lines, true);
+                }
+
+                currentLength += line.Length;
+                lines.Add(line);
+            }
+            
+            return new ReadChunkResult(lines, false);
         }
 
         public void Dispose()
