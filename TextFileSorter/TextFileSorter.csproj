@@ -7,7 +7,14 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" Version="5.1.2" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0-preview.2.20160.3" />
       <PackageReference Include="NLog" Version="4.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
