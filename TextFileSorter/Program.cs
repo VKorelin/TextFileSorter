@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using Autofac;
 using NLog;
 using TextFileSorter.Logging;
@@ -13,12 +11,6 @@ namespace TextFileSorter
     {
         static void Main(string[] args)
         {
-            // FOR DEBUG
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            const string sourceFolder = @"C:\Users\VKorelin\source\repos\TextFileSorter\TestData";
-            args = new[] {Path.Combine(sourceFolder, "data_1kb.txt")};
-            
             LogConfigurator.Configure();
             var logger = LogManager.GetCurrentClassLogger();
 
