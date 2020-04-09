@@ -86,18 +86,14 @@ namespace TextFileSorter.Sorting
             {
                 try
                 {
-                    var lines = _chunksQueue.Take();
-                    lines = lines
-                        .Select(x => x.Split(". "))
-                        .OrderBy(x => x[1])
-                        .ThenBy(x => x[0])
-                        .Select(x => $"{x[0]}. {x[1]}")
-                        .ToArray();
+                    var entries = _chunksQueue.Take()
+                        .Select(x => new Entry(x))
+                        .OrderBy(x => x);
             
                     var chunkIdx = Interlocked.Increment(ref _chunkNumber);
             
                     var savePath = Path.Combine(_chunksFolder, $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
-                    File.WriteAllLines(savePath, lines, _encodingInfoProvider.Encoding);
+                    File.WriteAllLines(savePath, entries.Select(x => x.ToString()), _encodingInfoProvider.Encoding);
                     _chunkNames.Add(savePath);
                 }
                 catch (InvalidOperationException)

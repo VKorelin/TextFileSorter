@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using TextFileSorter.Configuration;
 
@@ -105,35 +104,6 @@ namespace TextFileSorter.Sorting
                 readers[i].Close();
                 File.Delete(chunkNames[i]);
             }
-        }
-
-        private class Entry : IComparable<Entry>
-        {
-            public Entry(string entry)
-            {
-                var entryArr = entry.Split(". ");
-                
-                Number = int.Parse(entryArr[0]);
-                Line = entryArr[1];
-            }
-            
-            public int Number { get; }
-            
-            public string Line { get; }
-
-            public int CompareTo(Entry other)
-            {
-                if (other == null)
-                {
-                    return -1;
-                }
-                
-                var lineCompareResult = string.CompareOrdinal(Line, other.Line);
-                return lineCompareResult == 0 ? Number.CompareTo(other.Number) : lineCompareResult;
-            }
-
-            public override string ToString()
-                => $"{Number}. {Line}";
         }
     }
 }
