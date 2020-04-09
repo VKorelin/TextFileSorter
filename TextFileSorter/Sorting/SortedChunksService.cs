@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TextFileSorter.Configuration;
@@ -13,13 +12,13 @@ namespace TextFileSorter.Sorting
     public class SortedChunksService : ISortedChunksService
     {
         private static readonly char[] SplitChars = {'\r', '\n'};
-        
+
         private readonly Func<string, IChunkFileReader> _chunkFileReaderFactory;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
+        
         private readonly string _fileName;
         private readonly string _fileNameWithoutExtension;
-        private readonly Encoding _encoding;
-        private readonly string _outputFolder;
+        public readonly string _chunksFolder;
         
         private readonly BlockingCollection<string[]> _chunksQueue;
         private readonly ConcurrentBag<string> _chunkNames;
@@ -37,8 +36,12 @@ namespace TextFileSorter.Sorting
             _encodingInfoProvider = encodingInfoProvider;
             _fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_fileName);
             _chunkFileReaderFactory = chunkFileReaderFactory;
-            _encoding = configurationProvider.Encoding;
-            _outputFolder = configurationProvider.OutputFolder;
+            
+            _chunksFolder = Path.Combine(configurationProvider.OutputFolder, "chunks");
+            if (!Directory.Exists(_chunksFolder))
+            {
+                Directory.CreateDirectory(_chunksFolder);
+            }
             
             _chunkNames = new ConcurrentBag<string>();
             _chunksQueue = new BlockingCollection<string[]>(new ConcurrentQueue<string[]>(), configurationProvider.ThreadCount);
@@ -93,8 +96,8 @@ namespace TextFileSorter.Sorting
             
                     var chunkIdx = Interlocked.Increment(ref _chunkNumber);
             
-                    var savePath = Path.Combine(_outputFolder, "chunks", $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
-                    File.WriteAllLines(savePath, lines, _encoding);
+                    var savePath = Path.Combine(_chunksFolder, $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
+                    File.WriteAllLines(savePath, lines, _encodingInfoProvider.Encoding);
                     _chunkNames.Add(savePath);
                 }
                 catch (InvalidOperationException)
