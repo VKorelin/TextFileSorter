@@ -108,7 +108,7 @@ namespace TextFileSorter.Sorting
 
         private string ReverseEntry(string entry)
         {
-            var arr = entry.Split(".");
+            var arr = entry.Split(". ");
             return $"{arr[1]}. {arr[0]}";
         }
     }
