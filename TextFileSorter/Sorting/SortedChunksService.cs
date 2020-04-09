@@ -81,7 +81,7 @@ namespace TextFileSorter.Sorting
                     var chunkIdx = Interlocked.Increment(ref _chunkNumber);
             
                     var savePath = Path.Combine(_chunksFolder, $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
-                    File.WriteAllLines(savePath, entries.Select(x => x.BuildReverseEntry()), _encodingInfoProvider.Encoding);
+                    File.WriteAllLines(savePath, entries.Select(x => x.ToStringReversed()), _encodingInfoProvider.Encoding);
                     _chunkNames.Add(savePath);
                 }
                 catch (InvalidOperationException)
