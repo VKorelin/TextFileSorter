@@ -1,103 +1,139 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using TextFileSorter.Configuration;
 
 namespace TextFileSorter.Sorting
 {
     internal sealed class ChunkMergeService : IChunkMergeService
     {
+        private const int RecordSize = 100;
+        private const int MaxUsage = 500000000;
+        private const double RecordOverhead = 7.5;
+        
+        private readonly IConfigurationProvider _configurationProvider;
+
+        public ChunkMergeService(IConfigurationProvider configurationProvider)
+        {
+            _configurationProvider = configurationProvider;
+        }
+        
         public void MergeChunks(IList<string> chunkNames, string outputFileName)
         {
-            var paths = chunkNames;
-            var chunks = paths.Count; // Number of chunks
-            var recordsize = 100; // estimated record size
-            var records = 10000000; // estimated total # records
-            var maxusage = 500000000; // max memory usage
-            var buffersize = maxusage / chunks; // bytes of each queue
-            var recordoverhead = 7.5; // The overhead of using Queue<>
-            var bufferlen = (int) (buffersize / recordsize / recordoverhead); // number of records in each queue
+            var chunksNumber = chunkNames.Count;
+            var bufferSize = MaxUsage / chunksNumber;
 
-            // Open the files and make queues
-            var readers = new StreamReader[chunks];
-            var queues = new Queue<string>[chunks];
-            for (var i = 0; i < chunks; i++)
+            // ReSharper disable once PossibleLossOfFraction
+            var bufferLength = (int) (bufferSize / RecordSize / RecordOverhead);
+
+            var readers = new StreamReader[chunksNumber];
+            var queues = new Queue<Entry>[chunksNumber];
+            for (var i = 0; i < chunksNumber; i++)
             {
-                readers[i] = new StreamReader(paths[i], Encoding.Unicode);
-                queues[i] = new Queue<string>(bufferlen);
-                LoadQueue(queues[i], readers[i], bufferlen);
+                readers[i] = new StreamReader(chunkNames[i], _configurationProvider.Encoding);
+                queues[i] = new Queue<Entry>(bufferLength);
+                LoadQueue(queues[i], readers[i], bufferLength);
             }
 
-            // Merge!
-            var sw = CreateStreamWriter(outputFileName);
-            int lowest_index, j, progress = 0;
-            string lowest_value;
-            
+            Merge(chunksNumber, queues, readers, bufferLength, outputFileName);
+            DeleteChunks(chunkNames, readers);
+        }
+
+        private void Merge(
+            int chunksNumber, 
+            IList<Queue<Entry>> queues, 
+            IReadOnlyList<StreamReader> readers, 
+            int bufferLen, 
+            string outputFileName)
+        {
+            using var writer = new StreamWriter(outputFileName, false, _configurationProvider.Encoding);
+
             while (true)
             {
-                // Find the chunk with the lowest value
-                lowest_index = -1;
-                lowest_value = "";
-                for (j = 0; j < chunks; j++)
+                var lowestIndex = -1;
+                Entry lowestValue = null;
+                for (var j = 0; j < chunksNumber; j++)
                 {
                     if (queues[j] != null)
                     {
-                        if (lowest_index < 0 ||
-                            String.CompareOrdinal(
-                                queues[j].Peek(), lowest_value) < 0)
+                        if (lowestIndex < 0 || queues[j].Peek().CompareTo(lowestValue) < 0)
                         {
-                            lowest_index = j;
-                            lowest_value = queues[j].Peek();
+                            lowestIndex = j;
+                            lowestValue = queues[j].Peek();
                         }
                     }
                 }
 
-                // Was nothing found in any queue? We must be done then.
-                if (lowest_index == -1)
+                if (lowestIndex == -1)
                 {
                     break;
                 }
 
-                // Output it
-                sw.WriteLine(lowest_value);
-
-                // Remove from queue
-                queues[lowest_index].Dequeue();
-                // Have we emptied the queue? Top it up
-                if (queues[lowest_index].Count == 0)
+                writer.WriteLine(lowestValue.ToString());
+                queues[lowestIndex].Dequeue();
+                
+                if (queues[lowestIndex].Count == 0)
                 {
-                    LoadQueue(queues[lowest_index],
-                        readers[lowest_index], bufferlen);
-                    // Was there nothing left to read?
-                    if (queues[lowest_index].Count == 0)
+                    LoadQueue(queues[lowestIndex], readers[lowestIndex], bufferLen);
+                    
+                    if (queues[lowestIndex].Count == 0)
                     {
-                        queues[lowest_index] = null;
+                        queues[lowestIndex] = null;
                     }
                 }
             }
 
-            sw.Close();
-
-            // Close and delete the files
-            for (int i = 0; i < chunks; i++)
-            {
-                readers[i].Close();
-                File.Delete(paths[i]);
-            }
+            writer.Close();
         }
-        
-        private static StreamWriter CreateStreamWriter(string fileName) 
-            => new StreamWriter(fileName, false, Encoding.Unicode);
 
-        private static void LoadQueue(Queue<string> queue, TextReader file, int records)
+        private static void LoadQueue(Queue<Entry> queue, TextReader file, int records)
         {
             for (var i = 0; i < records; i++)
             {
                 if (file.Peek() < 0) 
                     break;
-                
-                queue.Enqueue(file.ReadLine());
+
+                var entry = new Entry(file.ReadLine());
+                queue.Enqueue(entry);
             }
+        }
+
+        private static void DeleteChunks(IList<string> chunkNames, IList<StreamReader> readers)
+        {
+            for (var i = 0; i < chunkNames.Count; i++)
+            {
+                readers[i].Close();
+                File.Delete(chunkNames[i]);
+            }
+        }
+
+        private class Entry : IComparable<Entry>
+        {
+            public Entry(string entry)
+            {
+                var entryArr = entry.Split(". ");
+                
+                Number = int.Parse(entryArr[0]);
+                Line = entryArr[1];
+            }
+            
+            public int Number { get; }
+            
+            public string Line { get; }
+
+            public int CompareTo(Entry other)
+            {
+                if (other == null)
+                {
+                    return -1;
+                }
+                
+                var lineCompareResult = string.CompareOrdinal(Line, other.Line);
+                return lineCompareResult == 0 ? Number.CompareTo(other.Number) : lineCompareResult;
+            }
+
+            public override string ToString()
+                => $"{Number}. {Line}";
         }
     }
 }
