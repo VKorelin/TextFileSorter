@@ -81,19 +81,27 @@ namespace TextFileSorter.Sorting
         {
             while (!_chunksQueue.IsCompleted || _chunksQueue.Count > 0)
             {
-                var lines = _chunksQueue.Take();
-                lines = lines
-                    .Select(x => x.Split(". "))
-                    .OrderBy(x => x[1])
-                    .ThenBy(x => x[0])
-                    .Select(x => $"{x[0]}. {x[1]}")
-                    .ToArray();
+                try
+                {
+                    var lines = _chunksQueue.Take();
+                    lines = lines
+                        .Select(x => x.Split(". "))
+                        .OrderBy(x => x[1])
+                        .ThenBy(x => x[0])
+                        .Select(x => $"{x[0]}. {x[1]}")
+                        .ToArray();
             
-                var chunkIdx = Interlocked.Increment(ref _chunkNumber);
+                    var chunkIdx = Interlocked.Increment(ref _chunkNumber);
             
-                var savePath = Path.Combine(_outputFolder, "chunks", $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
-                File.WriteAllLines(savePath, lines, _encoding);
-                _chunkNames.Add(savePath);
+                    var savePath = Path.Combine(_outputFolder, "chunks", $"{_fileNameWithoutExtension}_{chunkIdx}.txt");
+                    File.WriteAllLines(savePath, lines, _encoding);
+                    _chunkNames.Add(savePath);
+                }
+                catch (InvalidOperationException)
+                {
+                    // An InvalidOperationException means that Take() was called on a completed collection
+                    break;
+                }
             }
         }
     }
