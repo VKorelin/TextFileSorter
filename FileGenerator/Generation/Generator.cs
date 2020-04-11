@@ -1,5 +1,4 @@
-﻿using System;
-using FileGenerator.Configuration;
+﻿using FileGenerator.Configuration;
 using FileGenerator.IO;
 using NLog;
 
@@ -10,19 +9,19 @@ namespace FileGenerator.Generation
     {
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Func<IChunkGenerator> _chunkGeneratorFactory;
+        private readonly IChunkGenerationJob _chunkGenerationJob;
         private readonly IFileNameProvider _fileNameProvider;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
 
         private readonly int _defaultBufferSize;
 
         public Generator(
-            Func<IChunkGenerator> chunkGeneratorFactory,
+            IChunkGenerationJob chunkGenerationJob,
             IFileNameProvider fileNameProvider,
             IEncodingInfoProvider encodingInfoProvider,
             IConfigurationProvider configurationProvider)
         {
-            _chunkGeneratorFactory = chunkGeneratorFactory;
+            _chunkGenerationJob = chunkGenerationJob;
             _fileNameProvider = fileNameProvider;
             _encodingInfoProvider = encodingInfoProvider;
             _defaultBufferSize = configurationProvider.DefaultBufferSize;
@@ -36,16 +35,17 @@ namespace FileGenerator.Generation
 
             fileSize = AdjustFileSize(fileSize);
             long currentFileSize = 0;
+            
+            _chunkGenerationJob.Start();
 
-            using (var chunkGenerator = _chunkGeneratorFactory.Invoke())
+            do
             {
-                do
-                {
-                    var chunkSize = CalculateChunkSize(fileSize - currentFileSize);
-                    currentFileSize += chunkSize;
-                    chunkGenerator.GenerateNext(chunkSize);
-                } while (currentFileSize < fileSize);
-            }
+                var chunkSize = CalculateChunkSize(fileSize - currentFileSize);
+                currentFileSize += chunkSize;
+                _chunkGenerationJob.AddNext(chunkSize);
+            } while (currentFileSize < fileSize);
+            
+            _chunkGenerationJob.Stop();
         }
 
         /// <summary>

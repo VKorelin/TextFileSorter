@@ -16,11 +16,12 @@ namespace FileGenerator
             builder.RegisterType<ConfigurationProvider>().AsImplementedInterfaces().SingleInstance();
             
             // Generation
-            builder.RegisterType<ChunkInfoBuilder>().AsImplementedInterfaces().InstancePerDependency().ExternallyOwned();
+            builder.RegisterType<ChunkInfoBuilder>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<RandomNumberGenerator>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<RandomStringGenerator>().AsImplementedInterfaces().InstancePerDependency();
+            builder.RegisterType<ChunkGenerator>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<Generator>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<ChunkGenerator>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<ChunkGenerationJob>().AsImplementedInterfaces().SingleInstance();
             
             // IO
             builder.RegisterType<FileWriter>().AsImplementedInterfaces().InstancePerDependency().ExternallyOwned();

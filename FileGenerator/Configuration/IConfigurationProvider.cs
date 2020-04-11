@@ -21,5 +21,10 @@ namespace FileGenerator.Configuration
         /// Default size of buffer for generated chunk
         /// </summary>
         int DefaultBufferSize { get; }
+        
+        /// <summary>
+        /// Number of threads available
+        /// </summary>
+        int ThreadsCount { get; }
     }
 }

@@ -32,5 +32,8 @@ namespace FileGenerator.Configuration
 
         ///<inheritdoc/>
         public int DefaultBufferSize => 1024 * 1024 * 8;
+
+        ///<inheritdoc/>
+        public int ThreadsCount => Environment.ProcessorCount;
     }
 }

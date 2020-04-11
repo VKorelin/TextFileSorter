@@ -37,8 +37,9 @@ namespace FileGenerator.IntegrationTests
             _containerBuilder.RegisterInstance(filePathProviderMock.Object).As<IFileNameProvider>().SingleInstance();
             
             _configurationProviderMock = new Mock<IConfigurationProvider>();
-            _configurationProviderMock.Setup(x => x.DefaultBufferSize).Returns(1024 * 1024 * 8);
-            _configurationProviderMock.Setup(x => x.Encoding).Returns(Encoding.UTF8);
+            _configurationProviderMock.SetupGet(x => x.DefaultBufferSize).Returns(1024 * 1024 * 8);
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.UTF8);
+            _configurationProviderMock.SetupGet(x => x.ThreadsCount).Returns(Environment.ProcessorCount);
             _containerBuilder.RegisterInstance(_configurationProviderMock.Object).As<IConfigurationProvider>().SingleInstance();
 
             Directory.CreateDirectory(DirectoryName);
