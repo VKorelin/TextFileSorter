@@ -56,7 +56,7 @@ namespace TextFileSorter.IntegrationTests
             _container?.Dispose();
         }
 
-        private string GenerateFile(long size, Encoding encoding = null)
+        private string GenerateFile(long size, Encoding encoding)
         {
             return _fileGenerator?.GenerateFile(size, encoding);
         }
