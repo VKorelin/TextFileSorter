@@ -22,11 +22,11 @@ namespace TextFileSorter.Sorting
             var bufferLength = (int) (bytesPerChunk / maxEntryLength);
 
             var chunkReaders = new StreamReader[chunksCount];
-            var chunkQueues = new Queue<string>[chunksCount];
+            var chunkQueues = new Queue<Entry>[chunksCount];
             for (var i = 0; i < chunksCount; i++)
             {
                 chunkReaders[i] = new StreamReader(chunkNames[i], _configurationProvider.Encoding);
-                chunkQueues[i] = new Queue<string>(bufferLength);
+                chunkQueues[i] = new Queue<Entry>(bufferLength);
                 LoadQueue(chunkQueues[i], chunkReaders[i], bufferLength);
             }
 
@@ -43,7 +43,7 @@ namespace TextFileSorter.Sorting
             string outputFileName, 
             int chunksCount, 
             int bufferLength, 
-            Queue<string>[] queues, 
+            Queue<Entry>[] queues, 
             StreamReader[] readers)
         {
             using var writer = new StreamWriter(outputFileName, false, _configurationProvider.Encoding);
@@ -51,13 +51,12 @@ namespace TextFileSorter.Sorting
             while (true)
             {
                 var lowestIndex = -1;
-                var lowestEntry = "";
+                var lowestEntry = default(Entry);
                 for (var i = 0; i < chunksCount; i++)
                 {
                     if (queues[i] != null)
                     {
-                        string peek = queues[i].Peek();
-                        if (lowestIndex < 0 || string.CompareOrdinal(peek, lowestEntry) < 0)
+                        if (lowestIndex < 0 || queues[i].Peek().CompareTo(lowestEntry) < 0)
                         {
                             lowestIndex = i;
                             lowestEntry = queues[i].Peek();
@@ -70,7 +69,7 @@ namespace TextFileSorter.Sorting
                     break;
                 }
 
-                writer.WriteLine(ReverseEntry(lowestEntry));
+                writer.WriteLine(lowestEntry.ToString());
 
                 queues[lowestIndex].Dequeue();
                 if (queues[lowestIndex].Count == 0)
@@ -86,19 +85,13 @@ namespace TextFileSorter.Sorting
             writer.Close();
         }
 
-        private static string ReverseEntry(string lowestValue)
-        {
-            var arr = lowestValue.Split(".");
-            return $"{arr[2]}. {arr[0]}";
-        }
-
-        private static void LoadQueue(Queue<string> queue, TextReader file, int records)
+        private static void LoadQueue(Queue<Entry> queue, TextReader file, int records)
         {
             for (var i = 0; i < records; i++)
             {
                 if (file.Peek() < 0) 
                     break;
-                queue.Enqueue(file.ReadLine());
+                queue.Enqueue(Entry.Build(file.ReadLine()));
             }
         }
     }

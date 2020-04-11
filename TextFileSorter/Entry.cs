@@ -17,18 +17,13 @@ namespace TextFileSorter
                 throw new ArgumentException($"Entry line has invalid format: {entry}", nameof(entry));
             }
 
-            if (!int.TryParse(entryArr[0], out var number) && number < 1000000000)
+            if (!int.TryParse(entryArr[0], out var number))
             {
-                throw new ArgumentException($"Entry number should be integer less than 1000000000 but was {entryArr[0]}", nameof(entry));
+                throw new ArgumentException($"Entry number should be integer less but was {entryArr[0]}", nameof(entry));
             }
 
             var line = entryArr.Length > 2 ? string.Join(string.Empty, entryArr.Skip(1)) : entryArr[1];
-            if (line.Any(x => x == '.'))
-            {
-                throw new ArgumentException("Line should not contain any dots ('.')");
-            }
-            
-            return new Entry(number, entryArr.Length > 2 ? string.Join(string.Empty, entryArr.Skip(1)) : entryArr[1]);
+            return new Entry(number, line);
         }
         
         private Entry(int number, string line)
@@ -49,15 +44,5 @@ namespace TextFileSorter
         
         public override string ToString()
             => $"{Number}. {Line}";
-        
-        /// <summary>
-        /// To sortable string by line, then by number.
-        /// </summary>
-        /// <returns>Reversed line</returns>
-        public string ToStringReversed()
-        {
-            var numberStr = Number.ToString();
-            return $"{Line}.{numberStr.Length}.{numberStr}";
-        }
     }
 }
