@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using FileGenerator.Configuration;
 
 namespace FileGenerator.IO
@@ -12,7 +13,11 @@ namespace FileGenerator.IO
         public FileNameProvider(IConfigurationProvider configurationProvider)
         {
             var outputPath = configurationProvider.OutputFolder;
-            _outputFolder = Path.IsPathRooted(outputPath) ? outputPath : Path.Combine(Directory.GetCurrentDirectory(), outputPath);
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var dir = Path.GetDirectoryName(assembly.FullName);
+            
+            _outputFolder = Path.IsPathRooted(outputPath) ? outputPath : Path.Combine(dir, outputPath);
 
             if (!Directory.Exists(_outputFolder))
             {
