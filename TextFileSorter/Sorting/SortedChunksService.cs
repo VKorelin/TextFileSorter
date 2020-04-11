@@ -39,11 +39,13 @@ namespace TextFileSorter.Sorting
             {
                 Directory.CreateDirectory(_chunksFolder);
             }
+
+            var threadsCount = Math.Max(configurationProvider.ThreadCount - 1, 1);
             
             _chunkNames = new ConcurrentBag<string>();
-            _chunksQueue = new BlockingCollection<IList<string>>(new ConcurrentQueue<IList<string>>(), configurationProvider.ThreadCount - 1);
+            _chunksQueue = new BlockingCollection<IList<string>>(new ConcurrentQueue<IList<string>>(), threadsCount);
             
-            _sortTasks = new Task[configurationProvider.ThreadCount - 1];
+            _sortTasks = new Task[threadsCount];
             for (var i = 0; i < _sortTasks.Length; i++)
             {
                 _sortTasks[i] = Task.Run(SortNext);

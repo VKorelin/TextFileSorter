@@ -36,6 +36,6 @@ namespace TextFileSorter.Configuration
         public long RamLimit => 1024 * 1024 * 512;
 
         ///<inheritdoc/>
-        public int ThreadCount => Math.Max(Environment.ProcessorCount / 2, 2);
+        public int ThreadCount => Math.Max(Environment.ProcessorCount / 2, 1);
     }
 }
