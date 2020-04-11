@@ -29,5 +29,8 @@ namespace FileGenerator.Configuration
 
         ///<inheritdoc/>
         public string OutputFolder { get; }
+
+        ///<inheritdoc/>
+        public int DefaultBufferSize => 1024 * 1024 * 8;
     }
 }

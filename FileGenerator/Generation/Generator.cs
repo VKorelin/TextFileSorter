@@ -1,4 +1,5 @@
 ﻿using System;
+using FileGenerator.Configuration;
 using FileGenerator.IO;
 using NLog;
 
@@ -8,24 +9,23 @@ namespace FileGenerator.Generation
     public class Generator : IGenerator
     {
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
-        
-        /// <summary>
-        /// Size of chunk
-        /// </summary>
-        private const int DefaultBufferSize = 1024 * 1024 * 8;
 
         private readonly Func<IChunkGenerator> _chunkGeneratorFactory;
         private readonly IFileNameProvider _fileNameProvider;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
 
+        private readonly int _defaultBufferSize;
+
         public Generator(
             Func<IChunkGenerator> chunkGeneratorFactory,
             IFileNameProvider fileNameProvider,
-            IEncodingInfoProvider encodingInfoProvider)
+            IEncodingInfoProvider encodingInfoProvider,
+            IConfigurationProvider configurationProvider)
         {
             _chunkGeneratorFactory = chunkGeneratorFactory;
             _fileNameProvider = fileNameProvider;
             _encodingInfoProvider = encodingInfoProvider;
+            _defaultBufferSize = configurationProvider.DefaultBufferSize;
         }
         
         ///<inheritdoc/>
@@ -60,7 +60,7 @@ namespace FileGenerator.Generation
         /// </summary>
         /// <param name="freeSpace">Part of file in bytes that should be filled</param>
         /// <returns>Chunk size</returns>
-        private static long CalculateChunkSize(long freeSpace)
-            => DefaultBufferSize <= freeSpace - DefaultBufferSize ? DefaultBufferSize : freeSpace;
+        private long CalculateChunkSize(long freeSpace)
+            => _defaultBufferSize <= freeSpace - _defaultBufferSize ? _defaultBufferSize : freeSpace;
     }
 }

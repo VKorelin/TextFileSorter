@@ -16,5 +16,10 @@ namespace FileGenerator.Configuration
         /// Generated file name
         /// </summary>
         string OutputFolder { get; }
+
+        /// <summary>
+        /// Default size of buffer for generated chunk
+        /// </summary>
+        int DefaultBufferSize { get; }
     }
 }

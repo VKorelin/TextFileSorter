@@ -22,6 +22,8 @@ namespace FileGenerator.IntegrationTests
         private ContainerBuilder _containerBuilder;
         private IContainer _container;
 
+        private Mock<IConfigurationProvider> _configurationProviderMock;
+
         [SetUp]
         public void Setup()
         {
@@ -33,6 +35,11 @@ namespace FileGenerator.IntegrationTests
             var filePathProviderMock = new Mock<IFileNameProvider>();
             filePathProviderMock.Setup(x => x.GetPath()).Returns(FileName);
             _containerBuilder.RegisterInstance(filePathProviderMock.Object).As<IFileNameProvider>().SingleInstance();
+            
+            _configurationProviderMock = new Mock<IConfigurationProvider>();
+            _configurationProviderMock.Setup(x => x.DefaultBufferSize).Returns(1024 * 1024 * 8);
+            _configurationProviderMock.Setup(x => x.Encoding).Returns(Encoding.UTF8);
+            _containerBuilder.RegisterInstance(_configurationProviderMock.Object).As<IConfigurationProvider>().SingleInstance();
 
             Directory.CreateDirectory(DirectoryName);
         }
@@ -73,9 +80,7 @@ namespace FileGenerator.IntegrationTests
         public void Generates1KbFileInUnicode()
         {
             const long fileSize = 1024;
-
-            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.Unicode);
-            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.Unicode);
 
             var bootstrapper = CreateInstance();
 
@@ -88,9 +93,7 @@ namespace FileGenerator.IntegrationTests
         public void Generates1KbFileInUtf8()
         {
             const long fileSize = 1024;
-
-            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.UTF8);
-            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.UTF8);
 
             var bootstrapper = CreateInstance();
 
@@ -103,9 +106,7 @@ namespace FileGenerator.IntegrationTests
         public void Generates1GbFileInUnicode()
         {
             const long fileSize = 1073741824; //1024 * 1024 * 1024;
-            
-            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.Unicode);
-            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.Unicode);
 
             var bootstrapper = CreateInstance();
 
@@ -118,9 +119,7 @@ namespace FileGenerator.IntegrationTests
         public void Generates1GbFileInUtf8()
         {
             const long fileSize = 1073741824; //1024 * 1024 * 1024;
-
-            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.Unicode);
-            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.UTF8);
 
             var bootstrapper = CreateInstance();
 
@@ -130,13 +129,11 @@ namespace FileGenerator.IntegrationTests
         }
 
         [Test]
-        [Timeout(1000 * 60 * 3)]
+        [Timeout(1000 * 60 * 2)]
         public void Generates10GbFileInUnicode()
         {
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
-
-            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.Unicode);
-            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.Unicode);
 
             var bootstrapper = CreateInstance();
 
@@ -146,13 +143,11 @@ namespace FileGenerator.IntegrationTests
         }
 
         [Test]
-        [Timeout(1000 * 60 * 6)]
+        [Timeout(1000 * 60 * 3)]
         public void Generates10GbFileInUtf8()
         {
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
-
-            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.UTF8);
-            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.UTF8);
 
             var bootstrapper = CreateInstance();
 
@@ -165,9 +160,7 @@ namespace FileGenerator.IntegrationTests
         public void GeneratesFileWithCorrectStructure()
         {
             const long fileSize = 1024 * 1024 * 32; //32Mb
-
-            var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.UTF8);
-            _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();
+            _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.UTF8);
 
             var bootstrapper = CreateInstance();
 
