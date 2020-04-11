@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using TextFileSorter.Configuration;
 
 namespace TextFileSorter.Sorting
@@ -17,9 +18,11 @@ namespace TextFileSorter.Sorting
         {
             var chunksCount = chunkNames.Count;
 
-            var bytesPerChunk = _configurationProvider.RamLimit / chunksCount;
+            var bytesPerChunk = _configurationProvider.RamLimit / (chunksCount + 1);
             const int maxEntryLength = 100;
             var bufferLength = (int) (bytesPerChunk / maxEntryLength);
+
+            var writeBufferLength = _configurationProvider.Encoding.GetMaxCharCount((int) bytesPerChunk);
 
             var chunkReaders = new StreamReader[chunksCount];
             var chunkQueues = new Queue<Entry>[chunksCount];
@@ -30,7 +33,7 @@ namespace TextFileSorter.Sorting
                 LoadQueue(chunkQueues[i], chunkReaders[i], bufferLength);
             }
 
-            Merge(outputFileName, chunksCount, bufferLength, chunkQueues, chunkReaders);
+            Merge(outputFileName, chunksCount, bufferLength, chunkQueues, chunkReaders, writeBufferLength);
 
             for (var i = 0; i < chunksCount; i++)
             {
@@ -44,9 +47,11 @@ namespace TextFileSorter.Sorting
             int chunksCount, 
             int bufferLength, 
             Queue<Entry>[] queues, 
-            StreamReader[] readers)
+            StreamReader[] readers,
+            int writeBufferLength)
         {
             using var writer = new StreamWriter(outputFileName, false, _configurationProvider.Encoding);
+            var buffer = new StringBuilder();
 
             while (true)
             {
@@ -68,8 +73,13 @@ namespace TextFileSorter.Sorting
                 {
                     break;
                 }
-
-                writer.WriteLine(lowestEntry.ToString());
+                
+                buffer.AppendLine(lowestEntry.ToString());
+                if (buffer.Length > writeBufferLength)
+                {
+                    writer.Write(buffer);
+                    buffer.Clear();
+                }
 
                 queues[lowestIndex].Dequeue();
                 if (queues[lowestIndex].Count == 0)
@@ -82,6 +92,7 @@ namespace TextFileSorter.Sorting
                 }
             }
 
+            writer.Write(buffer);
             writer.Close();
         }
 

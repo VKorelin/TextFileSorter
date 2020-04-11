@@ -25,24 +25,23 @@ namespace TextFileSorter
             var line = entryArr.Length > 2 ? string.Join(string.Empty, entryArr.Skip(1)) : entryArr[1];
             return new Entry(number, line);
         }
+
+        private readonly int _number;
+        private readonly string _line;
         
         private Entry(int number, string line)
         {
-            Number = number;
-            Line = line;
+            _number = number;
+            _line = line;
         }
-
-        public int Number { get; }
-
-        public string Line { get; }
 
         public int CompareTo(Entry other)
         {
-            var lineCompareResult = string.CompareOrdinal(Line, other.Line);
-            return lineCompareResult == 0 ? Number.CompareTo(other.Number) : lineCompareResult;
+            var lineCompareResult = string.CompareOrdinal(_line, other._line);
+            return lineCompareResult == 0 ? _number.CompareTo(other._number) : lineCompareResult;
         }
         
         public override string ToString()
-            => $"{Number}. {Line}";
+            => _number + ". " + _line;
     }
 }
