@@ -5,11 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using FileGenerator.Configuration;
 using FileGenerator.IO;
+using NLog;
 
 namespace FileGenerator.Generation
 {
     internal sealed class ChunkGenerationJob : IChunkGenerationJob
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        
         private readonly IFileNameProvider _fileNameProvider;
         private readonly Func<string, IFileWriter> _fileWriterFactory;
         private readonly Func<IChunkGenerator> _chunkGeneratorFactory;
@@ -54,6 +57,8 @@ namespace FileGenerator.Generation
         ///<inheritdoc/>
         public void Start()
         {
+            Logger.Info("Start chunk generation job");
+            
             foreach (var generateTask in _generateTasks)
             {
                 generateTask.Start();
@@ -76,6 +81,8 @@ namespace FileGenerator.Generation
         ///<inheritdoc/>
         public void Stop()
         {
+            Logger.Info("Stopping chunk generation job...");
+
             if (!isStarted)
                 throw new InvalidOperationException("Job should be started");
             
@@ -86,6 +93,8 @@ namespace FileGenerator.Generation
             _writeTask.Wait();
 
             isStarted = false;
+            
+            Logger.Info("Chunk generation job is stopped");
         }
 
         private void GenerateChunk(CancellationToken token)
@@ -104,7 +113,10 @@ namespace FileGenerator.Generation
 
         private void WriteToFile(CancellationToken token)
         {
-            using var writer = _fileWriterFactory.Invoke(_fileNameProvider.GetPath());
+            var fileName = _fileNameProvider.GetPath();
+            Logger.Info("File name is {fileName}", fileName);
+            
+            using var writer = _fileWriterFactory.Invoke(fileName);
 
             while (!token.IsCancellationRequested || _writeQueue.Any())
             {

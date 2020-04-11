@@ -1,28 +1,22 @@
 ﻿using FileGenerator.Configuration;
 using FileGenerator.IO;
-using NLog;
 
 namespace FileGenerator.Generation
 {
     ///<inheritdoc/>
     public class Generator : IGenerator
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
-
         private readonly IChunkGenerationJob _chunkGenerationJob;
-        private readonly IFileNameProvider _fileNameProvider;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
 
         private readonly int _defaultBufferSize;
 
         public Generator(
             IChunkGenerationJob chunkGenerationJob,
-            IFileNameProvider fileNameProvider,
             IEncodingInfoProvider encodingInfoProvider,
             IConfigurationProvider configurationProvider)
         {
             _chunkGenerationJob = chunkGenerationJob;
-            _fileNameProvider = fileNameProvider;
             _encodingInfoProvider = encodingInfoProvider;
             _defaultBufferSize = configurationProvider.DefaultBufferSize;
         }
@@ -30,9 +24,6 @@ namespace FileGenerator.Generation
         ///<inheritdoc/>
         public void Generate(long fileSize)
         {
-            var fileName = _fileNameProvider.GetPath();
-            Logger.Info("File name is {fileName}", fileName);
-
             fileSize = AdjustFileSize(fileSize);
             long currentFileSize = 0;
             

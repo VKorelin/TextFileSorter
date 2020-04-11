@@ -45,17 +45,29 @@ namespace FileGenerator.Tests.Generation
 
         private ChunkGenerator CreateInstance()
             => new ChunkGenerator(
+                _chunkInfoBuilderMock.Object,
                 _randomNumberGeneratorMock.Object,
-                _randomStringGeneratorMock.Object,
-                _chunkInfoBuilderMock.Object);
+                _randomStringGeneratorMock.Object);
 
         [Test]
-        public void GeneratesChunk()
+        public void BuildsChunkInfo()
+        {
+            var instance = CreateInstance();
+
+            instance.GenerateNext(10);
+            
+            _chunkInfoBuilderMock.Verify(x => x.Build(10), Times.Once);
+        }
+
+        [Test]
+        public void GeneratesChunkWithMultipleRows()
         {
             var instance = CreateInstance();
 
             var chunk = instance.GenerateNext(10);
             
+            _randomNumberGeneratorMock.Verify(x => x.Generate(It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(4));
+            _randomStringGeneratorMock.Verify(x => x.Generate(It.IsAny<long>()), Times.Exactly(3));
             chunk.ShouldBe("1. line1\r\n2. line2\r\n3. line3\r\n4. line1\r\n");
         }
     }
