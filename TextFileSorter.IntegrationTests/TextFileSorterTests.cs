@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Shouldly;
 using TextFileSorter.Configuration;
 using TextFileSorter.IntegrationTests.Tools;
+using TextFileSorter.Logging;
 using TextFileSorter.Sorting;
 
 namespace TextFileSorter.IntegrationTests
@@ -24,6 +25,8 @@ namespace TextFileSorter.IntegrationTests
         [SetUp]
         public void Setup()
         {
+            LogConfigurator.Configure();
+            
             _fileGenerator = new FileGeneratorTool();
             
             _containerBuilder = new ContainerBuilder();
