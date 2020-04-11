@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileGenerator.Tests", "File
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileGenerator.IntegrationTests", "FileGenerator.IntegrationTests\FileGenerator.IntegrationTests.csproj", "{2873411E-73C6-4DF3-81D5-284CC16FCE2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextFileSorter.IntegrationTests", "TextFileSorter.IntegrationTests\TextFileSorter.IntegrationTests.csproj", "{475A0180-E4CE-4E1E-AA34-17051322B374}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +34,14 @@ Global
 		{2873411E-73C6-4DF3-81D5-284CC16FCE2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2873411E-73C6-4DF3-81D5-284CC16FCE2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2873411E-73C6-4DF3-81D5-284CC16FCE2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{475A0180-E4CE-4E1E-AA34-17051322B374}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{475A0180-E4CE-4E1E-AA34-17051322B374}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{475A0180-E4CE-4E1E-AA34-17051322B374}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{475A0180-E4CE-4E1E-AA34-17051322B374}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{914DDF0F-1830-4523-9CD0-03FCA56CEE7F} = {C70136E9-2BE7-4DAD-AF90-C5D325EE4348}
 		{2873411E-73C6-4DF3-81D5-284CC16FCE2B} = {C70136E9-2BE7-4DAD-AF90-C5D325EE4348}
+		{475A0180-E4CE-4E1E-AA34-17051322B374} = {C70136E9-2BE7-4DAD-AF90-C5D325EE4348}
 	EndGlobalSection
 EndGlobal
