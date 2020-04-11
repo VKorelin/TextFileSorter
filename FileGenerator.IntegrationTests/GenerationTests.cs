@@ -164,7 +164,7 @@ namespace FileGenerator.IntegrationTests
         [Test]
         public void GeneratesFileWithCorrectStructure()
         {
-            const long fileSize = 1024 * 1024 * 16; //16Mb
+            const long fileSize = 1024 * 1024 * 32; //32Mb
 
             var configurationProvider = Mock.Of<IConfigurationProvider>(x => x.Encoding == Encoding.UTF8);
             _containerBuilder.RegisterInstance(configurationProvider).As<IConfigurationProvider>().SingleInstance();

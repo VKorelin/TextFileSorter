@@ -1,15 +1,16 @@
-﻿namespace FileGenerator.Generation
+﻿using System;
+
+namespace FileGenerator.Generation
 {
     /// <summary>
     /// Generate chunk (piece of data to be written to file)
     /// </summary>
-    public interface IChunkGenerator
+    public interface IChunkGenerator : IDisposable
     {
         /// <summary>
-        /// Generate next random chunk of particular size
+        /// Put next size for generation queue
         /// </summary>
         /// <param name="chunkSize">Size of chunk</param>
-        /// <returns>Generated chunk</returns>
-        string GenerateNext(long chunkSize);
+        void GenerateNext(long chunkSize);
     }
 }

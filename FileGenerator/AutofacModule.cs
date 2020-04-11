@@ -12,17 +12,19 @@ namespace FileGenerator
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<Bootstrapper>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<ArgumentsValidator>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<Generator>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<ChunkInfoBuilder>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<ChunkGenerator>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<FileWriter>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<FileNameProvider>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<RandomNumberGenerator>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<RandomStringGenerator>().AsImplementedInterfaces().SingleInstance();
+            // Configuration
             builder.RegisterType<ConfigurationProvider>().AsImplementedInterfaces().SingleInstance();
             
+            // Generation
+            builder.RegisterType<ChunkInfoBuilder>().AsImplementedInterfaces().InstancePerDependency().ExternallyOwned();
+            builder.RegisterType<RandomNumberGenerator>().AsImplementedInterfaces().InstancePerDependency();
+            builder.RegisterType<RandomStringGenerator>().AsImplementedInterfaces().InstancePerDependency();
+            builder.RegisterType<Generator>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<ChunkGenerator>().AsImplementedInterfaces().SingleInstance();
+            
+            // IO
+            builder.RegisterType<FileWriter>().AsImplementedInterfaces().InstancePerDependency().ExternallyOwned();
+            builder.RegisterType<FileNameProvider>().AsImplementedInterfaces().SingleInstance();
             builder.Register<IEncodingInfoProvider>(x =>
                 {
                     var config = x.Resolve<IConfigurationProvider>();
@@ -35,6 +37,11 @@ namespace FileGenerator
                 })
                 .AsImplementedInterfaces()
                 .SingleInstance();
+            
+            // Validation
+            builder.RegisterType<ArgumentsValidator>().AsImplementedInterfaces().SingleInstance();
+            
+            builder.RegisterType<Bootstrapper>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

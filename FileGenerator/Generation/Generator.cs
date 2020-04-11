@@ -14,19 +14,16 @@ namespace FileGenerator.Generation
         /// </summary>
         private const int DefaultBufferSize = 1024 * 1024 * 8;
 
-        private readonly IChunkGenerator _chunkGenerator;
-        private readonly Func<string, IFileWriter> _fileWriterFactory;
+        private readonly Func<IChunkGenerator> _chunkGeneratorFactory;
         private readonly IFileNameProvider _fileNameProvider;
         private readonly IEncodingInfoProvider _encodingInfoProvider;
 
         public Generator(
-            IChunkGenerator chunkGenerator, 
-            Func<string, IFileWriter> fileWriterFactory,
+            Func<IChunkGenerator> chunkGeneratorFactory,
             IFileNameProvider fileNameProvider,
             IEncodingInfoProvider encodingInfoProvider)
         {
-            _chunkGenerator = chunkGenerator;
-            _fileWriterFactory = fileWriterFactory;
+            _chunkGeneratorFactory = chunkGeneratorFactory;
             _fileNameProvider = fileNameProvider;
             _encodingInfoProvider = encodingInfoProvider;
         }
@@ -36,18 +33,17 @@ namespace FileGenerator.Generation
         {
             var fileName = _fileNameProvider.GetPath();
             Logger.Info("File name is {fileName}", fileName);
-            
-            using (var fileWriter = _fileWriterFactory.Invoke(fileName))
+
+            fileSize = AdjustFileSize(fileSize);
+            long currentFileSize = 0;
+
+            using (var chunkGenerator = _chunkGeneratorFactory.Invoke())
             {
-                fileSize = AdjustFileSize(fileSize);
-                long currentFileSize = 0;
-                
                 do
                 {
                     var chunkSize = CalculateChunkSize(fileSize - currentFileSize);
                     currentFileSize += chunkSize;
-                    var chunk = _chunkGenerator.GenerateNext(chunkSize);
-                    fileWriter.Write(chunk);
+                    chunkGenerator.GenerateNext(chunkSize);
                 } while (currentFileSize < fileSize);
             }
         }
@@ -64,7 +60,7 @@ namespace FileGenerator.Generation
         /// </summary>
         /// <param name="freeSpace">Part of file in bytes that should be filled</param>
         /// <returns>Chunk size</returns>
-        private static long CalculateChunkSize(long freeSpace) 
+        private static long CalculateChunkSize(long freeSpace)
             => DefaultBufferSize <= freeSpace - DefaultBufferSize ? DefaultBufferSize : freeSpace;
     }
 }
