@@ -18,7 +18,7 @@ namespace TextFileSorter.IntegrationTests
     public class TextFileSorterTests
     {
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
-        
+
         private FileGeneratorTool _fileGenerator;
         private ContainerBuilder _containerBuilder;
         private IContainer _container;
@@ -30,19 +30,20 @@ namespace TextFileSorter.IntegrationTests
         public void Setup()
         {
             LogConfigurator.Configure();
-            
+
             _fileGenerator = new FileGeneratorTool();
-            
+
             _containerBuilder = new ContainerBuilder();
             _containerBuilder.RegisterModule<AutofacModule>();
-            
+
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.SetupGet(x => x.OutputFolder).Returns("data");
             _configurationProviderMock.SetupGet(x => x.RamLimit).Returns(1024 * 1024 * 512);
             _configurationProviderMock.SetupGet(x => x.ThreadCount).Returns(Environment.ProcessorCount / 2);
             _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.Unicode);
-            
-            _containerBuilder.RegisterInstance(_configurationProviderMock.Object).As<IConfigurationProvider>().SingleInstance();
+
+            _containerBuilder.RegisterInstance(_configurationProviderMock.Object).As<IConfigurationProvider>()
+                .SingleInstance();
         }
 
         [TearDown]
@@ -50,7 +51,7 @@ namespace TextFileSorter.IntegrationTests
         {
             if (File.Exists(_sortedFileName))
                 File.Delete(_sortedFileName);
-            
+
             _fileGenerator?.Dispose();
             _container?.Dispose();
         }
@@ -63,7 +64,7 @@ namespace TextFileSorter.IntegrationTests
         private IExternalMergeSorter CreateSorter(Encoding encoding)
         {
             _configurationProviderMock.SetupGet(x => x.Encoding).Returns(encoding);
-            
+
             _container = _containerBuilder.Build();
             return _container.Resolve<IExternalMergeSorter>();
         }
@@ -73,7 +74,7 @@ namespace TextFileSorter.IntegrationTests
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(sourceFileName);
             var directoryName = Path.GetDirectoryName(sourceFileName);
             _sortedFileName = Path.Combine(directoryName, $"{fileNameWithoutExtension}_sorted.txt");
-            
+
             File.Exists(_sortedFileName).ShouldBeTrue();
             var fi = new FileInfo(_sortedFileName);
             fi.Length.ShouldBe(size);
@@ -90,19 +91,11 @@ namespace TextFileSorter.IntegrationTests
                 var nextEntry = entries[i + 1];
 
                 var linesCompareResult = string.CompareOrdinal(entry.Line, nextEntry.Line);
-                try
-                {
-                    linesCompareResult.ShouldBeLessThanOrEqualTo(0);
+                linesCompareResult.ShouldBeLessThanOrEqualTo(0);
 
-                    if (linesCompareResult == 0)
-                    {
-                        entry.Number.ShouldBeLessThanOrEqualTo(nextEntry.Number);
-                    }
-                }
-                catch (Exception e)
+                if (linesCompareResult == 0)
                 {
-                    Console.WriteLine(e);
-                    throw;
+                    entry.Number.ShouldBeLessThanOrEqualTo(nextEntry.Number);
                 }
             }
         }
@@ -116,14 +109,14 @@ namespace TextFileSorter.IntegrationTests
         public void SortsFileInUnicode(long fileSize)
         {
             var file = GenerateFile(fileSize, Encoding.Unicode);
-            
+
             var sorter = CreateSorter(Encoding.Unicode);
             sorter.Sort(file).ShouldBeTrue();
-            
+
             var sortedFile = AssertSortedFileExists(file, fileSize);
             AssertFileSorted(sortedFile);
         }
-        
+
         [TestCase(1024)]
         [TestCase(1024 * 1024)]
         [TestCase(1024 * 1024 * 64)]
@@ -133,87 +126,87 @@ namespace TextFileSorter.IntegrationTests
         public void SortsFileInUtf8(long fileSize)
         {
             var file = GenerateFile(fileSize, Encoding.UTF8);
-            
+
             var sorter = CreateSorter(Encoding.UTF8);
             sorter.Sort(file).ShouldBeTrue();
-            
+
             var sortedFile = AssertSortedFileExists(file, fileSize);
             AssertFileSorted(sortedFile);
         }
-        
+
         [Test]
         public void Sorts1GbFileInUnicode()
         {
             const int fileSize = 1024 * 1024 * 1024;
-            
+
             var file = GenerateFile(fileSize, Encoding.Unicode);
-            
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            
+
             var sorter = CreateSorter(Encoding.Unicode);
             sorter.Sort(file).ShouldBeTrue();
 
             stopWatch.Stop();
             Logger.Info($"File sorted in {stopWatch.Elapsed}");
-            
+
             AssertSortedFileExists(file, fileSize);
         }
-        
+
         [Test]
         public void Sorts1GbFileInUtf8()
         {
             const int fileSize = 1024 * 1024 * 1024;
-            
+
             var file = GenerateFile(fileSize, Encoding.UTF8);
-            
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            
+
             var sorter = CreateSorter(Encoding.UTF8);
             sorter.Sort(file).ShouldBeTrue();
 
             stopWatch.Stop();
             Logger.Info($"File sorted in {stopWatch.Elapsed}");
-            
+
             AssertSortedFileExists(file, fileSize);
         }
-        
+
         [Test]
         public void Sorts10GbFileInUnicode()
         {
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
-            
+
             var file = GenerateFile(fileSize, Encoding.Unicode);
-            
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            
+
             var sorter = CreateSorter(Encoding.Unicode);
             sorter.Sort(file).ShouldBeTrue();
 
             stopWatch.Stop();
             Logger.Info($"File sorted in {stopWatch.Elapsed}");
-            
+
             AssertSortedFileExists(file, fileSize);
         }
-        
+
         [Test]
         public void Sorts10GbFileInUtf8()
         {
             const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
-            
+
             var file = GenerateFile(fileSize, Encoding.UTF8);
-            
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            
+
             var sorter = CreateSorter(Encoding.UTF8);
             sorter.Sort(file).ShouldBeTrue();
 
             stopWatch.Stop();
             Logger.Info($"File sorted in {stopWatch.Elapsed}");
-            
+
             AssertSortedFileExists(file, fileSize);
         }
 
@@ -221,53 +214,38 @@ namespace TextFileSorter.IntegrationTests
         public void LetsGoToDrinkSomething()
         {
             const long fileSize = 107374182400; //1024 * 1024 * 1024 * 100;
-            
+
             var file = GenerateFile(fileSize, Encoding.Unicode);
-            
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            
+
             var sorter = CreateSorter(Encoding.Unicode);
             sorter.Sort(file).ShouldBeTrue();
 
             stopWatch.Stop();
             Logger.Info($"File sorted in {stopWatch.Elapsed}");
-            
+
             AssertSortedFileExists(file, fileSize);
         }
-        
+
         [Test]
         public void HowAboutBeer()
         {
             const long fileSize = 107374182400; //1024 * 1024 * 1024 * 100;
-            
+
             var file = GenerateFile(fileSize, Encoding.UTF8);
-            
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            
+
             var sorter = CreateSorter(Encoding.UTF8);
             sorter.Sort(file).ShouldBeTrue();
 
             stopWatch.Stop();
             Logger.Info($"File sorted in {stopWatch.Elapsed}");
-            
+
             AssertSortedFileExists(file, fileSize);
         }
-        
-        /// <summary>
-        /// ToDo: drop after debugging
-        /// </summary>
-        //[TestCase(1024 * 1024 * 128)]
-        //public void DEBUG(long fileSize)
-        //{
-        //    const string file = @"C:\Users\VKorelin\source\repos\TextFileSorter\TextFileSorter.IntegrationTests\bin\Debug\netcoreapp3.1\data\file.txt";
-        //    
-        //    var sorter = CreateSorter(Encoding.Unicode);
-        //    sorter.Sort(file).ShouldBeTrue();
-        //    
-        //    var sortedFile = AssertSortedFileExists(file, fileSize);
-        //    AssertFileSorted(sortedFile);
-        //}
     }
 }
