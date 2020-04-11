@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Autofac;
 using Moq;
+using NLog;
 using NUnit.Framework;
 using Shouldly;
 using TextFileSorter.Configuration;
@@ -15,6 +17,8 @@ namespace TextFileSorter.IntegrationTests
 {
     public class TextFileSorterTests
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        
         private FileGeneratorTool _fileGenerator;
         private ContainerBuilder _containerBuilder;
         private IContainer _container;
@@ -135,6 +139,120 @@ namespace TextFileSorter.IntegrationTests
             
             var sortedFile = AssertSortedFileExists(file, fileSize);
             AssertFileSorted(sortedFile);
+        }
+        
+        [Test]
+        public void Sorts1GbFileInUnicode()
+        {
+            const int fileSize = 1024 * 1024 * 1024;
+            
+            var file = GenerateFile(fileSize, Encoding.Unicode);
+            
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            var sorter = CreateSorter(Encoding.Unicode);
+            sorter.Sort(file).ShouldBeTrue();
+
+            stopWatch.Stop();
+            Logger.Info($"File sorted in {stopWatch.Elapsed}");
+            
+            AssertSortedFileExists(file, fileSize);
+        }
+        
+        [Test]
+        public void Sorts1GbFileInUtf8()
+        {
+            const int fileSize = 1024 * 1024 * 1024;
+            
+            var file = GenerateFile(fileSize, Encoding.UTF8);
+            
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            var sorter = CreateSorter(Encoding.UTF8);
+            sorter.Sort(file).ShouldBeTrue();
+
+            stopWatch.Stop();
+            Logger.Info($"File sorted in {stopWatch.Elapsed}");
+            
+            AssertSortedFileExists(file, fileSize);
+        }
+        
+        [Test]
+        public void Sorts10GbFileInUnicode()
+        {
+            const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
+            
+            var file = GenerateFile(fileSize, Encoding.Unicode);
+            
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            var sorter = CreateSorter(Encoding.Unicode);
+            sorter.Sort(file).ShouldBeTrue();
+
+            stopWatch.Stop();
+            Logger.Info($"File sorted in {stopWatch.Elapsed}");
+            
+            AssertSortedFileExists(file, fileSize);
+        }
+        
+        [Test]
+        public void Sorts10GbFileInUtf8()
+        {
+            const long fileSize = 10737418240; //1024 * 1024 * 1024 * 10;
+            
+            var file = GenerateFile(fileSize, Encoding.UTF8);
+            
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            var sorter = CreateSorter(Encoding.UTF8);
+            sorter.Sort(file).ShouldBeTrue();
+
+            stopWatch.Stop();
+            Logger.Info($"File sorted in {stopWatch.Elapsed}");
+            
+            AssertSortedFileExists(file, fileSize);
+        }
+
+        [Test]
+        public void LetsGoToDrinkSomething()
+        {
+            const long fileSize = 107374182400; //1024 * 1024 * 1024 * 100;
+            
+            var file = GenerateFile(fileSize, Encoding.Unicode);
+            
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            var sorter = CreateSorter(Encoding.Unicode);
+            sorter.Sort(file).ShouldBeTrue();
+
+            stopWatch.Stop();
+            Logger.Info($"File sorted in {stopWatch.Elapsed}");
+            
+            AssertSortedFileExists(file, fileSize);
+        }
+        
+        [Test]
+        public void HowAboutBeer()
+        {
+            const long fileSize = 107374182400; //1024 * 1024 * 1024 * 100;
+            
+            var file = GenerateFile(fileSize, Encoding.UTF8);
+            
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            
+            var sorter = CreateSorter(Encoding.UTF8);
+            sorter.Sort(file).ShouldBeTrue();
+
+            stopWatch.Stop();
+            Logger.Info($"File sorted in {stopWatch.Elapsed}");
+            
+            AssertSortedFileExists(file, fileSize);
         }
         
         /// <summary>
