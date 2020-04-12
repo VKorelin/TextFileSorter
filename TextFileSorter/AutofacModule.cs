@@ -17,6 +17,7 @@ namespace TextFileSorter
             builder.RegisterType<ChunkMergeService>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<ExternalMergeSorter>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<SortedChunksService>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<FilesMerger>().AsImplementedInterfaces().SingleInstance();
             
             // Validation
             builder.RegisterType<ArgumentsValidator>().AsImplementedInterfaces().SingleInstance();
