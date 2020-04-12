@@ -29,9 +29,11 @@ namespace TextFileSorter.Sorting
 
         public void MergeChunks(IList<string> chunkNames, string outputFileName)
         {
-            var threadsCount = _configurationProvider.ThreadCount * 2 < chunkNames.Count
+            var chunksCount = Math.Min(chunkNames.Count, 8);
+            
+            var threadsCount = _configurationProvider.ThreadCount * chunksCount < chunkNames.Count
                 ? _configurationProvider.ThreadCount
-                : (chunkNames.Count + 1) / 2;
+                : (chunkNames.Count + chunksCount - 1) / chunksCount;
 
             _ramPerThread = _configurationProvider.RamLimit / threadsCount;
                 
@@ -41,7 +43,7 @@ namespace TextFileSorter.Sorting
             var tasks = new Task[threadsCount];
             for (var i = 0; i < threadsCount; i++)
             {
-                tasks[i] = Task.Run(DoTask);
+                tasks[i] = Task.Run(() => DoTask(chunksCount));
             }
 
             Task.WaitAll(tasks);
@@ -55,56 +57,65 @@ namespace TextFileSorter.Sorting
             MergeChunks(_mergedFiles.ToList(), outputFileName);
         }
 
-        private void DoTask()
+        private void DoTask(int chunksCount)
         {
             while (true)
             {
-                if (!_filesQueue.TryDequeue(out var file1))
+                var filesToMerge = new List<string>();
+                for (int i = 0; i < chunksCount; i++)
                 {
+                    if (!_filesQueue.TryDequeue(out var file))
+                    {
+                        break;
+                    }
+                    
+                    filesToMerge.Add(file);
+                }
+                
+                if (!filesToMerge.Any())
+                    return;
+
+                if (filesToMerge.Count == 1)
+                {
+                    _mergedFiles.Add(filesToMerge.First());
                     return;
                 }
 
-                if (!_filesQueue.TryDequeue(out var file2))
-                {
-                    _mergedFiles.Add(file1);
-                    return;
-                }
-
-                var mergedFile = MergeTwoFiles(file1, file2);
+                var mergedFile = MergeTwoFiles(filesToMerge);
                 _mergedFiles.Add(mergedFile);
             }
         }
 
-        private string MergeTwoFiles(string file1, string file2)
+        private string MergeTwoFiles(IList<string> filesToMerge)
         {
-            var bytesPerFile = _ramPerThread / 2;
+            var bytesPerFile = _ramPerThread / filesToMerge.Count;
             var bufferLength = (int) (bytesPerFile / MaxEntryLength);
 
             var writeBufferLength = _configurationProvider.Encoding.GetMaxCharCount((int) bytesPerFile);
 
-            var fileReader1 = new StreamReader(file1, _configurationProvider.Encoding);
-            var fileReader2 = new StreamReader(file2, _configurationProvider.Encoding);
+            var fileReaders = new StreamReader[filesToMerge.Count];
+            var entryQueues = new Queue<Entry>[filesToMerge.Count];
+            for (var i = 0; i < filesToMerge.Count; i++)
+            {
+                fileReaders[i] = new StreamReader(filesToMerge[i], _configurationProvider.Encoding);
+                entryQueues[i] = new Queue<Entry>(bufferLength);
+                LoadQueue(entryQueues[i], fileReaders[i], bufferLength);
+            }
 
-            var fileQueue1 = new Queue<Entry>(bufferLength);
-            var fileQueue2 = new Queue<Entry>(bufferLength);
-
-            LoadQueue(fileQueue1, fileReader1, bufferLength);
-            LoadQueue(fileQueue2, fileReader2, bufferLength);
-
-            var mergedFile = BuildOutputName(file1);
+            var mergedFile = BuildOutputName(filesToMerge.First());
             
-            Merge(mergedFile, 2, bufferLength, new [] { fileQueue1, fileQueue2 }, new [] { fileReader1, fileReader2 }, writeBufferLength);
+            Merge(mergedFile, filesToMerge.Count, bufferLength, entryQueues, fileReaders, writeBufferLength);
 
-            fileReader1.Close();
-            fileReader2.Close();
-
-            File.Delete(file1);
-            File.Delete(file2);
+            for (var i = 0; i < filesToMerge.Count; i++)
+            {
+                fileReaders[i].Close();
+                File.Delete(filesToMerge[i]);
+            }
 
             return mergedFile;
         }
         
-        private string BuildOutputName(string sourceFile)
+        private static string BuildOutputName(string sourceFile)
         {
             var dir = Path.GetDirectoryName(sourceFile);
             return Path.Combine(dir, Guid.NewGuid() + ".txt");
