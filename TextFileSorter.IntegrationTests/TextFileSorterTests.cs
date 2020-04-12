@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -41,6 +41,7 @@ namespace TextFileSorter.IntegrationTests
             _configurationProviderMock.SetupGet(x => x.RamLimit).Returns(1024 * 1024 * 512);
             _configurationProviderMock.SetupGet(x => x.ThreadCount).Returns(Environment.ProcessorCount);
             _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.Unicode);
+            _configurationProviderMock.SetupGet(x => x.MexChunksNumberInMerge).Returns(8);
 
             _containerBuilder.RegisterInstance(_configurationProviderMock.Object).As<IConfigurationProvider>()
                 .SingleInstance();

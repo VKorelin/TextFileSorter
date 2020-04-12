@@ -29,7 +29,7 @@ namespace TextFileSorter.Sorting
 
         public void MergeChunks(IList<string> chunkNames, string outputFileName)
         {
-            var chunksCount = Math.Min(chunkNames.Count, 8);
+            var chunksCount = Math.Min(chunkNames.Count, _configurationProvider.MexChunksNumberInMerge);
             
             var threadsCount = _configurationProvider.ThreadCount * chunksCount < chunkNames.Count
                 ? _configurationProvider.ThreadCount

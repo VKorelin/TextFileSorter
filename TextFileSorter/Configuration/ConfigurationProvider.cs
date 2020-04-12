@@ -37,5 +37,8 @@ namespace TextFileSorter.Configuration
 
         ///<inheritdoc/>
         public int ThreadCount => Environment.ProcessorCount;
+
+        ///<inheritdoc/>
+        public int MexChunksNumberInMerge => 8;
     }
 }
