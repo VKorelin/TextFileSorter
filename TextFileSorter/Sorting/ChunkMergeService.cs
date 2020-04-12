@@ -1,52 +1,120 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using TextFileSorter.Configuration;
 
 namespace TextFileSorter.Sorting
 {
     internal sealed class ChunkMergeService : IChunkMergeService
     {
+        private const int MaxEntryLength = 100;
+
         private readonly IConfigurationProvider _configurationProvider;
+
+        private ConcurrentQueue<string> _filesQueue;
+        private readonly ConcurrentBag<string> _mergedFiles;
+
+        private long _ramPerThread;
 
         public ChunkMergeService(IConfigurationProvider configurationProvider)
         {
             _configurationProvider = configurationProvider;
+            _filesQueue = new ConcurrentQueue<string>();
+            _mergedFiles = new ConcurrentBag<string>();
         }
 
         public void MergeChunks(IList<string> chunkNames, string outputFileName)
         {
-            var chunksCount = chunkNames.Count;
+            var threadsCount = _configurationProvider.ThreadCount * 2 < chunkNames.Count
+                ? _configurationProvider.ThreadCount
+                : (chunkNames.Count + 1) / 2;
 
-            var bytesPerChunk = _configurationProvider.RamLimit / (chunksCount + 1);
-            const int maxEntryLength = 100;
-            var bufferLength = (int) (bytesPerChunk / maxEntryLength);
+            _ramPerThread = _configurationProvider.RamLimit / threadsCount;
+                
+            _filesQueue = new ConcurrentQueue<string>(chunkNames);
+            _mergedFiles.Clear();
 
-            var writeBufferLength = _configurationProvider.Encoding.GetMaxCharCount((int) bytesPerChunk);
-
-            var chunkReaders = new StreamReader[chunksCount];
-            var chunkQueues = new Queue<Entry>[chunksCount];
-            for (var i = 0; i < chunksCount; i++)
+            var tasks = new Task[threadsCount];
+            for (var i = 0; i < threadsCount; i++)
             {
-                chunkReaders[i] = new StreamReader(chunkNames[i], _configurationProvider.Encoding);
-                chunkQueues[i] = new Queue<Entry>(bufferLength);
-                LoadQueue(chunkQueues[i], chunkReaders[i], bufferLength);
+                tasks[i] = Task.Run(DoTask);
             }
 
-            Merge(outputFileName, chunksCount, bufferLength, chunkQueues, chunkReaders, writeBufferLength);
+            Task.WaitAll(tasks);
 
-            for (var i = 0; i < chunksCount; i++)
+            if (_mergedFiles.Count == 1)
             {
-                chunkReaders[i].Close();
-                File.Delete(chunkNames[i]);
+                File.Move(_mergedFiles.First(), outputFileName, true);
+                return;
+            }
+            
+            MergeChunks(_mergedFiles.ToList(), outputFileName);
+        }
+
+        private void DoTask()
+        {
+            while (true)
+            {
+                if (!_filesQueue.TryDequeue(out var file1))
+                {
+                    return;
+                }
+
+                if (!_filesQueue.TryDequeue(out var file2))
+                {
+                    _mergedFiles.Add(file1);
+                    return;
+                }
+
+                var mergedFile = MergeTwoFiles(file1, file2);
+                _mergedFiles.Add(mergedFile);
             }
         }
 
+        private string MergeTwoFiles(string file1, string file2)
+        {
+            var bytesPerFile = _ramPerThread / 2;
+            var bufferLength = (int) (bytesPerFile / MaxEntryLength);
+
+            var writeBufferLength = _configurationProvider.Encoding.GetMaxCharCount((int) bytesPerFile);
+
+            var fileReader1 = new StreamReader(file1, _configurationProvider.Encoding);
+            var fileReader2 = new StreamReader(file2, _configurationProvider.Encoding);
+
+            var fileQueue1 = new Queue<Entry>(bufferLength);
+            var fileQueue2 = new Queue<Entry>(bufferLength);
+
+            LoadQueue(fileQueue1, fileReader1, bufferLength);
+            LoadQueue(fileQueue2, fileReader2, bufferLength);
+
+            var mergedFile = BuildOutputName(file1);
+            
+            Merge(mergedFile, 2, bufferLength, new [] { fileQueue1, fileQueue2 }, new [] { fileReader1, fileReader2 }, writeBufferLength);
+
+            fileReader1.Close();
+            fileReader2.Close();
+
+            File.Delete(file1);
+            File.Delete(file2);
+
+            return mergedFile;
+        }
+        
+        private string BuildOutputName(string sourceFile)
+        {
+            var dir = Path.GetDirectoryName(sourceFile);
+            return Path.Combine(dir, Guid.NewGuid() + ".txt");
+        }
+
         private void Merge(
-            string outputFileName, 
-            int chunksCount, 
-            int bufferLength, 
-            Queue<Entry>[] queues, 
+            string outputFileName,
+            int chunksCount,
+            int bufferLength,
+            Queue<Entry>[] queues,
             StreamReader[] readers,
             int writeBufferLength)
         {

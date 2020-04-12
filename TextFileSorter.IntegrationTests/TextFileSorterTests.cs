@@ -39,7 +39,7 @@ namespace TextFileSorter.IntegrationTests
             _configurationProviderMock = new Mock<IConfigurationProvider>();
             _configurationProviderMock.SetupGet(x => x.OutputFolder).Returns("data");
             _configurationProviderMock.SetupGet(x => x.RamLimit).Returns(1024 * 1024 * 512);
-            _configurationProviderMock.SetupGet(x => x.ThreadCount).Returns(Environment.ProcessorCount / 2);
+            _configurationProviderMock.SetupGet(x => x.ThreadCount).Returns(Environment.ProcessorCount);
             _configurationProviderMock.SetupGet(x => x.Encoding).Returns(Encoding.Unicode);
 
             _containerBuilder.RegisterInstance(_configurationProviderMock.Object).As<IConfigurationProvider>()
@@ -85,18 +85,12 @@ namespace TextFileSorter.IntegrationTests
         private static void AssertFileSorted(string fileName)
         {
             var entries = File.ReadAllLines(fileName).Select(Entry.Build).ToArray();
-            for (var i = 0; i < entries.Length - 2; i++)
+            for (var i = 0; i < entries.Length - 1; i++)
             {
                 var entry = entries[i];
                 var nextEntry = entries[i + 1];
-
-                var linesCompareResult = string.CompareOrdinal(entry.Line, nextEntry.Line);
-                linesCompareResult.ShouldBeLessThanOrEqualTo(0);
-
-                if (linesCompareResult == 0)
-                {
-                    entry.Number.ShouldBeLessThanOrEqualTo(nextEntry.Number);
-                }
+                
+                entry.CompareTo(nextEntry).ShouldBeLessThanOrEqualTo(0);
             }
         }
 
